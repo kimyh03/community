@@ -1,6 +1,6 @@
-# community
+# Community
 
-## models
+## Entities
 
 - [ ] Category
 - [ ] User
@@ -8,9 +8,9 @@
 - [ ] Comment
 - [ ] Like
 
-## resolvers
+## Resolvers
 
-- [ ] Create account
+- [x] Create account
 - [ ] Delete account
 - [ ] Find password
 - [ ] Login
