@@ -41,12 +41,15 @@ export class User extends BaseEntity {
   email: string;
 
   @Field(() => [Category])
-  @ManyToMany((type) => Category)
+  @ManyToMany((type) => Category, { eager: true })
   @JoinTable()
   favCategories: Category[];
 
   @Field(() => [Post])
-  @OneToMany((type) => Post, (post) => post.user)
+  @OneToMany((type) => Post, (post) => post.user, {
+    eager: true,
+    cascade: true
+  })
   posts: Post[];
 
   @Field(() => Number)
@@ -58,15 +61,24 @@ export class User extends BaseEntity {
   isPrivateMyPosts: boolean;
 
   @Field(() => [Comment])
-  @OneToMany((type) => Comment, (comment) => comment.user)
+  @OneToMany((type) => Comment, (comment) => comment.user, {
+    eager: true,
+    cascade: true
+  })
   comments: Comment[];
 
   @Field(() => [Like])
-  @OneToMany((type) => Like, (like) => like.user)
+  @OneToMany((type) => Like, (like) => like.user, {
+    eager: true,
+    cascade: true
+  })
   likes: Like[];
 
   @Field(() => [Post])
-  @OneToMany((type) => Post, (post) => post.user)
+  @OneToMany((type) => Post, (post) => post.bookMakedUsers, {
+    eager: true,
+    cascade: true
+  })
   bookmarkedPosts: Post[];
 
   @Field(() => Boolean)

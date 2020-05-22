@@ -41,8 +41,11 @@ export class Post extends BaseEntity {
   @Column({ type: "integer", default: 0 })
   viewCount: number;
 
-  @Field(() => Like)
-  @OneToMany((type) => Like, (like) => like.post)
+  @Field(() => [Like])
+  @OneToMany((type) => Like, (like) => like.post, {
+    eager: true,
+    cascade: true
+  })
   likes: Like[];
 
   @Field(() => Number)
@@ -53,13 +56,20 @@ export class Post extends BaseEntity {
   @Column({ type: "boolean", default: false })
   isLiked: boolean;
 
-  @Field(() => Comment)
-  @OneToMany((type) => Comment, (comment) => comment.post)
+  @Field(() => [Comment])
+  @OneToMany((type) => Comment, (comment) => comment.post, {
+    eager: true,
+    cascade: true
+  })
   comments: Comment[];
 
   @Field(() => Number)
   @Column({ type: "integer", default: 0 })
   commentCount: number;
+
+  @Field(() => [User])
+  @OneToMany((type) => User, (user) => user.bookmarkedPosts)
+  bookMakedUsers: User[];
 
   @Field(() => String)
   @CreateDateColumn()
