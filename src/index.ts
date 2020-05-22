@@ -19,37 +19,34 @@ const resolverFiles: any[] = fileLoader(
 const mergedResolvers = mergeResolvers(resolverFiles);
 
 async function main() {
-  await createConnection(connectionOptions);
-
-  const schema = await buildSchema({
-    resolvers: [mergedResolvers.UserResolver]
-  });
-
-  const server = new ApolloServer({
-    schema,
-    context: { req: express.request }
-  });
-
-  const jwt = async (req, res, next): Promise<void> => {
-    const token = req.get("X-JWT");
-    if (token) {
-      const user = await decodeJWT(token);
-      if (user) {
-        req.user = user;
-      } else {
-        req.user = undefined;
-      }
-    }
-    next();
-  };
-
   const app = express();
   app.use(cors());
   app.use(helmet());
   app.use(morgan("dev"));
-  app.use(jwt);
+
+  const schema = await buildSchema({
+    resolvers: [mergedResolvers.UserResolver, mergedResolvers.PostResolver]
+  });
+
+  const server = new ApolloServer({
+    schema,
+    context: ({ req }) => {
+      const token = req.get("X-JWT");
+      if (token) {
+        const user = decodeJWT(token);
+        if (user) {
+          return user;
+        } else {
+          return null;
+        }
+      } else {
+        return null;
+      }
+    }
+  });
 
   await server.applyMiddleware({ app });
+  await createConnection(connectionOptions);
 
   app.listen({ port: 4000 }, () =>
     console.log(`✅ Server ready at http://localhost:4000${server.graphqlPath}`)
