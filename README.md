@@ -26,22 +26,24 @@
 
 - [x] Create post
 - [x] See post detail
-- [ ] Edit post
+- [x] Edit post
 - [x] Delete post
 - [ ] Toggle isBoomarked
 
 ### Category resolvers
 
 - [x] Create category
-- [x] See posts
-- [ ] Edit category
+- [x] See categories
+- [x] See post list
+- [x] Edit category
 - [x] Delete category
+- [ ] Toggle isfav
 
 ### Comment resolvers
 
-- [ ] Create comment
-- [ ] Edit comment
-- [ ] Delete comment
+- [x] Create comment
+- [x] Edit comment
+- [x] Delete comment
 
 ### Like resolvers
 
