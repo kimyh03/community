@@ -2,7 +2,6 @@ import { Arg, Ctx, Mutation, Query, Resolver } from "type-graphql";
 import { Category } from "../../models/Category";
 import { Post } from "../../models/Post";
 import { CreateCategoryInput } from "./types/CreateCategoryInput";
-import { SeePostListInput } from "./types/SeePostListInput";
 
 @Resolver()
 export class CategoryResolver {
@@ -17,20 +16,10 @@ export class CategoryResolver {
     return newCategory;
   }
 
-  @Mutation(() => Boolean)
-  async deleteCategory(@Arg("title") title: string, @Ctx() user) {
-    if (!user) throw Error("Log in please");
-    if (user.nickname !== "Hoony") throw Error("You don't have a permission");
-    const category = await Category.findOne({ where: { title } });
-    if (!category) throw Error("Category not found");
-    await category.remove();
-    return true;
-  }
-
   @Query(() => [Post])
-  async seePostList(@Arg("data") args: SeePostListInput) {
+  async seePostList(@Arg("title") title: string) {
     const category = await Category.findOne({
-      where: { title: args.category },
+      where: { title },
       relations: ["posts"]
     });
     if (!category) throw Error("Category not found");
@@ -42,5 +31,30 @@ export class CategoryResolver {
   async categories() {
     const categories = await Category.find({ relations: ["posts"] });
     return categories;
+  }
+
+  @Mutation(() => Category)
+  async editCategory(
+    @Arg("id") id: string,
+    @Arg("title") title: string,
+    @Ctx() user
+  ) {
+    if (!user) throw Error("Log in please");
+    if (user.nickname !== "Hoony") throw Error("You don't have a permission");
+    const category = await Category.findOne({ where: { id } });
+    if (!category) throw Error("Category not found");
+    category.title = title;
+    category.save();
+    return category;
+  }
+
+  @Mutation(() => Boolean)
+  async deleteCategory(@Arg("title") title: string, @Ctx() user) {
+    if (!user) throw Error("Log in please");
+    if (user.nickname !== "Hoony") throw Error("You don't have a permission");
+    const category = await Category.findOne({ where: { title } });
+    if (!category) throw Error("Category not found");
+    await category.remove();
+    return true;
   }
 }
