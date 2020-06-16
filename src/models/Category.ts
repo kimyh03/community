@@ -4,6 +4,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinTable,
   ManyToMany,
   OneToMany,
   PrimaryGeneratedColumn,
@@ -24,14 +25,12 @@ export class Category extends BaseEntity {
   title: string;
 
   @Field(() => [Post])
-  @OneToMany((type) => Post, (post) => post.category, {
-    eager: true,
-    cascade: true
-  })
+  @OneToMany((type) => Post, (post) => post.category)
   posts: Post[];
 
   @Field(() => [User])
-  @ManyToMany((type) => User, { cascade: true })
+  @ManyToMany((type) => User)
+  @JoinTable()
   haveFavUsers: User[];
 
   @Field(() => String)

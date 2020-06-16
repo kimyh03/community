@@ -18,11 +18,15 @@ export class Like extends BaseEntity {
   id: string;
 
   @Field(() => User)
-  @ManyToOne((type) => User, (user) => user.likes)
+  @ManyToOne((type) => User, (user) => user.likes, {
+    onDelete: "CASCADE"
+  })
   user: User;
 
   @Field(() => Post)
-  @ManyToOne((type) => Post, (post) => post.likes)
+  @ManyToOne((type) => Post, (post) => post.likes, {
+    onDelete: "CASCADE"
+  })
   post: Post;
 
   @Field(() => String)

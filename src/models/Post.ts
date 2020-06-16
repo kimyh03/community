@@ -4,6 +4,8 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinTable,
+  ManyToMany,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
@@ -22,11 +24,16 @@ export class Post extends BaseEntity {
   id: string;
 
   @Field(() => Category)
-  @ManyToOne((type) => Category, (category) => category.posts)
+  @ManyToOne((type) => Category, (category) => category.posts, {
+    onDelete: "CASCADE"
+  })
   category: Category;
 
   @Field(() => User)
-  @ManyToOne((type) => User, (user) => user.posts)
+  @ManyToOne((type) => User, (user) => user.posts, {
+    eager: true,
+    onDelete: "CASCADE"
+  })
   user: User;
 
   @Field(() => String)
@@ -42,25 +49,15 @@ export class Post extends BaseEntity {
   viewCount: number;
 
   @Field(() => [Like])
-  @OneToMany((type) => Like, (like) => like.post, {
-    eager: true,
-    cascade: true
-  })
+  @OneToMany((type) => Like, (like) => like.post)
   likes: Like[];
 
   @Field(() => Number)
   @Column({ type: "integer", default: 0 })
   likeCount: number;
 
-  @Field(() => Boolean)
-  @Column({ type: "boolean", default: false })
-  isLiked: boolean;
-
   @Field(() => [Comment])
-  @OneToMany((type) => Comment, (comment) => comment.post, {
-    eager: true,
-    cascade: true
-  })
+  @OneToMany((type) => Comment, (comment) => comment.post)
   comments: Comment[];
 
   @Field(() => Number)
@@ -68,7 +65,8 @@ export class Post extends BaseEntity {
   commentCount: number;
 
   @Field(() => [User])
-  @OneToMany((type) => User, (user) => user.bookmarkedPosts)
+  @ManyToMany((type) => User)
+  @JoinTable()
   bookMakedUsers: User[];
 
   @Field(() => String)

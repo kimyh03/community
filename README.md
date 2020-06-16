@@ -2,11 +2,11 @@
 
 ## Entities
 
-- [ ] Category
-- [ ] User
-- [ ] Post
-- [ ] Comment
-- [ ] Like
+- [x] Category
+- [x] User
+- [x] Post
+- [x] Comment
+- [x] Like
 
 ## Resolvers
 
@@ -24,18 +24,18 @@
 
 ### Post resolvers
 
-- [ ] Create post
-- [ ] See post detail
+- [x] Create post
+- [x] See post detail
 - [ ] Edit post
-- [ ] Delete post
+- [x] Delete post
 - [ ] Toggle isBoomarked
 
 ### Category resolvers
 
-- [ ] Create category
-- [ ] Delete category
-- [ ] See posts
-- [ ] Toggle isFavCategory
+- [x] Create category
+- [x] See posts
+- [ ] Edit category
+- [x] Delete category
 
 ### Comment resolvers
 

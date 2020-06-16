@@ -21,7 +21,7 @@ import { Post } from "./Post";
 export class User extends BaseEntity {
   @Field(() => ID)
   @PrimaryGeneratedColumn()
-  id: number;
+  id: string;
 
   @Field(() => String)
   @Column({ type: "text" })
@@ -41,15 +41,12 @@ export class User extends BaseEntity {
   email: string;
 
   @Field(() => [Category])
-  @ManyToMany((type) => Category, { eager: true })
+  @ManyToMany((type) => Category)
   @JoinTable()
   favCategories: Category[];
 
   @Field(() => [Post])
-  @OneToMany((type) => Post, (post) => post.user, {
-    eager: true,
-    cascade: true
-  })
+  @OneToMany((type) => Post, (post) => post.user)
   posts: Post[];
 
   @Field(() => Number)
@@ -61,24 +58,16 @@ export class User extends BaseEntity {
   isPrivateMyPosts: boolean;
 
   @Field(() => [Comment])
-  @OneToMany((type) => Comment, (comment) => comment.user, {
-    eager: true,
-    cascade: true
-  })
+  @OneToMany((type) => Comment, (comment) => comment.user)
   comments: Comment[];
 
   @Field(() => [Like])
-  @OneToMany((type) => Like, (like) => like.user, {
-    eager: true,
-    cascade: true
-  })
+  @OneToMany((type) => Like, (like) => like.user)
   likes: Like[];
 
   @Field(() => [Post])
-  @OneToMany((type) => Post, (post) => post.bookMakedUsers, {
-    eager: true,
-    cascade: true
-  })
+  @ManyToMany((type) => Post)
+  @JoinTable()
   bookmarkedPosts: Post[];
 
   @Field(() => Boolean)

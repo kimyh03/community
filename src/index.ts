@@ -19,13 +19,14 @@ const resolverFiles: any[] = fileLoader(
 const mergedResolvers = mergeResolvers(resolverFiles);
 
 async function main() {
-  const app = express();
-  app.use(cors());
-  app.use(helmet());
-  app.use(morgan("dev"));
+  await createConnection(connectionOptions);
 
   const schema = await buildSchema({
-    resolvers: [mergedResolvers.UserResolver, mergedResolvers.PostResolver]
+    resolvers: [
+      mergedResolvers.UserResolver,
+      mergedResolvers.PostResolver,
+      mergedResolvers.CategoryResolver
+    ]
   });
 
   const server = new ApolloServer({
@@ -44,9 +45,12 @@ async function main() {
       }
     }
   });
+  const app = express();
+  app.use(cors());
+  app.use(helmet());
+  app.use(morgan("dev"));
 
   await server.applyMiddleware({ app });
-  await createConnection(connectionOptions);
 
   app.listen({ port: 4000 }, () =>
     console.log(`✅ Server ready at http://localhost:4000${server.graphqlPath}`)
