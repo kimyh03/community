@@ -9,6 +9,7 @@ import {
   ManyToMany,
   OneToMany,
   PrimaryGeneratedColumn,
+  RelationId,
   UpdateDateColumn
 } from "typeorm";
 import { Category } from "./Category";
@@ -44,6 +45,10 @@ export class User extends BaseEntity {
   @ManyToMany((type) => Category)
   @JoinTable()
   favCategories: Category[];
+
+  @Field(() => [Number])
+  @RelationId((user: User) => user.favCategories)
+  favCategoriesIds: number[];
 
   @Field(() => [Post])
   @OneToMany((type) => Post, (post) => post.user)

@@ -37,7 +37,7 @@
 - [x] See post list
 - [x] Edit category
 - [x] Delete category
-- [ ] Toggle isfav
+- [x] Toggle favCategory
 
 ### Comment resolvers
 
