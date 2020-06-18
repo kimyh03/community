@@ -26,7 +26,8 @@ async function main() {
       mergedResolvers.UserResolver,
       mergedResolvers.PostResolver,
       mergedResolvers.CategoryResolver,
-      mergedResolvers.CommentResolver
+      mergedResolvers.CommentResolver,
+      mergedResolvers.LikeResolver
     ]
   });
 

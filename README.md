@@ -19,8 +19,9 @@
 - [ ] See user porofile
 - [ ] See my profile
 - [ ] Edit my profile
-- [ ] Toggle isPrivateMyPosts
-- [ ] Toggle isbanned
+- [ ] Toggle isBanned
+- [ ] Toggle isPartner
+- [ ] Toggle isMaster
 
 ### Post resolvers
 
@@ -47,4 +48,4 @@
 
 ### Like resolvers
 
-- [ ] Toggle like
+- [x] Toggle like

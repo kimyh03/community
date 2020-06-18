@@ -1,6 +1,5 @@
 import { Arg, Ctx, Mutation, Query, Resolver } from "type-graphql";
 import { Category } from "../../models/Category";
-// import { Like } from "../../models/Like";
 import { Post } from "../../models/Post";
 import { User } from "../../models/User";
 import { CreatePostInput } from "./types/CreatePostInput";
@@ -64,17 +63,6 @@ export class PostResolver {
       }
     } else throw Error("You don't have a permission");
   }
-  /*
-  @Mutation(() => Post)
-  async toggleLike(@Arg("id") id: string, @Ctx() user) {
-    if (!user) throw Error("Log in please");
-const like = await Like.findOne({where:{post.id = id and user.id = user.id }})
-
-    const post = await Post.findOne({ relations: ["likes"], where: { id } });
-    if (!post) throw Error("Post not found");
-    return post;
-  }
-*/
 
   @Mutation(() => Post)
   async toggleBookmarkPost(@Arg("id") id: string, @Ctx() ctxUser) {
