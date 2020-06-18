@@ -64,7 +64,7 @@ export class Post extends BaseEntity {
   commentCount: number;
 
   @Field(() => [User])
-  @ManyToMany((type) => User)
+  @ManyToMany((type) => User, (user) => user.bookmarkedPosts)
   @JoinTable()
   bookMakedUsers: User[];
 

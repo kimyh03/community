@@ -8,7 +8,7 @@ import { SignUpResponse } from "./types/SignUpResponse";
 export class UserResolver {
   @Query(() => [User])
   async users() {
-    return await User.find();
+    return await User.find({ relations: ["bookmarkedPosts", "favCategories"] });
   }
 
   @Mutation(() => SignUpResponse)

@@ -1,6 +1,8 @@
 import { Arg, Ctx, Mutation, Query, Resolver } from "type-graphql";
 import { Category } from "../../models/Category";
+// import { Like } from "../../models/Like";
 import { Post } from "../../models/Post";
+import { User } from "../../models/User";
 import { CreatePostInput } from "./types/CreatePostInput";
 import { EditPostInput } from "./types/EditPostInput";
 
@@ -25,7 +27,7 @@ export class PostResolver {
   @Query(() => Post)
   async seePostDetail(@Arg("id") id: string) {
     const post = await Post.findOne({
-      relations: ["user", "category"],
+      relations: ["user", "category", "comments"],
       where: { id }
     });
     if (!post) throw Error("Post not found");
@@ -42,7 +44,7 @@ export class PostResolver {
     const post = await Post.findOne({ relations: [`user`], where: { id } });
     if (!post) throw Error("Post not found");
     if (post.user.id === user.id) {
-      Object.assign(post, args);
+      await Object.assign(post, args);
       post.save();
       return post;
     } else throw Error("You don't have a permission");
@@ -62,10 +64,51 @@ export class PostResolver {
       }
     } else throw Error("You don't have a permission");
   }
+  /*
+  @Mutation(() => Post)
+  async toggleLike(@Arg("id") id: string, @Ctx() user) {
+    if (!user) throw Error("Log in please");
+const like = await Like.findOne({where:{post.id = id and user.id = user.id }})
+
+    const post = await Post.findOne({ relations: ["likes"], where: { id } });
+    if (!post) throw Error("Post not found");
+    return post;
+  }
+*/
+
+  @Mutation(() => Post)
+  async toggleBookmarkPost(@Arg("id") id: string, @Ctx() ctxUser) {
+    if (!ctxUser.id) throw Error("Log in please");
+
+    const user = await User.findOne({
+      where: { id: ctxUser.id },
+      relations: ["bookmarkedPosts"]
+    });
+    if (!user) throw Error("User not found");
+
+    const post = await Post.findOne({ where: { id } });
+    if (!post) throw Error("Post not found");
+
+    const isBookmarkedPost = user.bookmarkedPostsIds.includes(Number(id));
+    let cleanBookmarkedPosts: Post[];
+
+    if (isBookmarkedPost) {
+      cleanBookmarkedPosts = user.bookmarkedPosts.filter(
+        (item) => item.id !== post.id
+      );
+    } else {
+      cleanBookmarkedPosts = [...user.bookmarkedPosts, post];
+    }
+    user.bookmarkedPosts = cleanBookmarkedPosts;
+    await user.save();
+    return user;
+  }
 
   @Query(() => [Post])
   async posts() {
-    const posts = await Post.find();
+    const posts = await Post.find({
+      relations: ["likes", "comments", "bookMakedUsers"]
+    });
     return posts;
   }
 }

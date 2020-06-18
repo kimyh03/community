@@ -42,7 +42,7 @@ export class User extends BaseEntity {
   email: string;
 
   @Field(() => [Category])
-  @ManyToMany((type) => Category)
+  @ManyToMany((type) => Category, (category) => category.haveFavUsers)
   @JoinTable()
   favCategories: Category[];
 
@@ -71,9 +71,13 @@ export class User extends BaseEntity {
   likes: Like[];
 
   @Field(() => [Post])
-  @ManyToMany((type) => Post)
+  @ManyToMany((type) => Post, (post) => post.bookMakedUsers)
   @JoinTable()
   bookmarkedPosts: Post[];
+
+  @Field(() => [Number])
+  @RelationId((user: User) => user.bookmarkedPosts)
+  bookmarkedPostsIds: number[];
 
   @Field(() => Boolean)
   @Column({ type: "boolean", default: false })

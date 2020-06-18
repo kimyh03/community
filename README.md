@@ -28,7 +28,7 @@
 - [x] See post detail
 - [x] Edit post
 - [x] Delete post
-- [ ] Toggle isBoomarked
+- [x] Toggle isBoomarked
 
 ### Category resolvers
 

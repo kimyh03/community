@@ -29,7 +29,7 @@ export class Category extends BaseEntity {
   posts: Post[];
 
   @Field(() => [User])
-  @ManyToMany((type) => User)
+  @ManyToMany((type) => User, (user) => user.favCategories)
   @JoinTable()
   haveFavUsers: User[];
 

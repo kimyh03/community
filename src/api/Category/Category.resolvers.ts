@@ -30,7 +30,9 @@ export class CategoryResolver {
 
   @Query(() => [Category])
   async categories() {
-    const categories = await Category.find({ relations: ["posts"] });
+    const categories = await Category.find({
+      relations: ["posts", "haveFavUsers"]
+    });
     return categories;
   }
 
