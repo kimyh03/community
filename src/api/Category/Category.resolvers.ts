@@ -7,9 +7,9 @@ import { CreateCategoryInput } from "./types/CreateCategoryInput";
 @Resolver()
 export class CategoryResolver {
   @Mutation(() => Category)
-  async createCategory(@Arg("data") args: CreateCategoryInput, @Ctx() user) {
-    if (!user.id) throw Error("Log in please");
-    if (user.nickname !== "Hoony") throw Error("You don't have a permission");
+  async createCategory(@Arg("data") args: CreateCategoryInput, @Ctx() ctxUser) {
+    if (!ctxUser.id) throw Error("Log in please");
+    if (ctxUser.nickname !== "Hoony") throw Error("You don't have a permission");
     const newCategory = await Category.create({
       title: args.title
     });
@@ -40,10 +40,10 @@ export class CategoryResolver {
   async editCategory(
     @Arg("id") id: string,
     @Arg("title") title: string,
-    @Ctx() user
+    @Ctx() ctxUser
   ) {
-    if (!user.id) throw Error("Log in please");
-    if (user.nickname !== "Hoony") throw Error("You don't have a permission");
+    if (!ctxUser.id) throw Error("Log in please");
+    if (ctxUser.nickname !== "Hoony") throw Error("You don't have a permission");
     const category = await Category.findOne({ where: { id } });
     if (!category) throw Error("Category not found");
     category.title = title;
@@ -52,9 +52,9 @@ export class CategoryResolver {
   }
 
   @Mutation(() => Boolean)
-  async deleteCategory(@Arg("title") title: string, @Ctx() user) {
-    if (!user.id) throw Error("Log in please");
-    if (user.nickname !== "Hoony") throw Error("You don't have a permission");
+  async deleteCategory(@Arg("title") title: string, @Ctx() ctxUser) {
+    if (!ctxUser.id) throw Error("Log in please");
+    if (ctxUser.nickname !== "Hoony") throw Error("You don't have a permission");
     const category = await Category.findOne({ where: { title } });
     if (!category) throw Error("Category not found");
     await category.remove();

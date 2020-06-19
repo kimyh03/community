@@ -8,15 +8,15 @@ import { EditPostInput } from "./types/EditPostInput";
 @Resolver()
 export class PostResolver {
   @Mutation(() => Post)
-  async createPost(@Arg("data") args: CreatePostInput, @Ctx() user) {
-    if (!user) throw Error("Log in please");
+  async createPost(@Arg("data") args: CreatePostInput, @Ctx() ctxUser) {
+    if (!ctxUser) throw Error("Log in please");
     const category = await Category.findOne({
       where: { title: args.category }
     });
     const newPost = Post.create({
       title: args.title,
       text: args.text,
-      user,
+      user: ctxUser,
       category
     });
     await newPost.save();
@@ -37,12 +37,12 @@ export class PostResolver {
   async editPost(
     @Arg("id") id: string,
     @Arg("data") args: EditPostInput,
-    @Ctx() user
+    @Ctx() ctxUser
   ) {
-    if (!user) throw Error("Log in please");
+    if (!ctxUser) throw Error("Log in please");
     const post = await Post.findOne({ relations: [`user`], where: { id } });
     if (!post) throw Error("Post not found");
-    if (post.user.id === user.id) {
+    if (post.user.id === ctxUser.id) {
       await Object.assign(post, args);
       post.save();
       return post;
@@ -50,11 +50,11 @@ export class PostResolver {
   }
 
   @Mutation(() => Boolean)
-  async deletePost(@Arg("id") id: string, @Ctx() user) {
-    if (!user) throw Error("Log in please");
+  async deletePost(@Arg("id") id: string, @Ctx() ctxUser) {
+    if (!ctxUser) throw Error("Log in please");
     const post = await Post.findOne({ relations: ["user"], where: { id } });
     if (!post) throw Error("Post not found");
-    if (post.user.id === user.id) {
+    if (post.user.id === ctxUser.id) {
       try {
         await post.remove();
         return true;

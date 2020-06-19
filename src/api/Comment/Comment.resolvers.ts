@@ -8,12 +8,12 @@ import { EditCommentInput } from "./types/EditCommentInput";
 @Resolver()
 export class CommentResolver {
   @Mutation(() => Comment)
-  async createComment(@Arg("args") args: CreateCommentInput, @Ctx() user) {
-    if (!user.id) throw Error("Log in please");
+  async createComment(@Arg("args") args: CreateCommentInput, @Ctx() ctxUser) {
+    if (!ctxUser.id) throw Error("Log in please");
     const post = await Post.findOne({ where: { id: args.postId } });
     if (!post) throw Error("Post not found");
     const newComment = await Comment.create({
-      user,
+      user: ctxUser,
       post,
       text: args.text
     });
@@ -24,22 +24,23 @@ export class CommentResolver {
   }
 
   @Mutation(() => Comment)
-  async editComment(@Arg("args") args: EditCommentInput, @Ctx() user) {
-    if (!user.id) throw Error("Log in please");
+  async editComment(@Arg("args") args: EditCommentInput, @Ctx() ctxUser) {
+    if (!ctxUser.id) throw Error("Log in please");
     const comment = await Comment.findOne({
       where: { id: args.commentId },
       relations: ["user"]
     });
     if (!comment) throw Error("Comment not found");
-    if (comment.user.id !== user.id) throw Error("You don't have a permission");
+    if (comment.user.id !== ctxUser.id)
+      throw Error("You don't have a permission");
     comment.text = args.text;
     await comment.save();
     return comment;
   }
 
   @Mutation(() => Boolean)
-  async deleteComment(@Arg("args") args: DeleteCommentInput, @Ctx() user) {
-    if (!user.id) throw Error("Log in please");
+  async deleteComment(@Arg("args") args: DeleteCommentInput, @Ctx() ctxUser) {
+    if (!ctxUser.id) throw Error("Log in please");
     const comment = await Comment.findOne({
       where: { id: args.commentId },
       relations: ["user"]
@@ -49,7 +50,8 @@ export class CommentResolver {
       where: { id: args.postId }
     });
     if (!post) throw Error("Post not found");
-    if (comment.user.id !== user.id) throw Error("You don't have a permission");
+    if (comment.user.id !== ctxUser.id)
+      throw Error("You don't have a permission");
     try {
       await comment.remove();
       post.commentCount = post.commentCount - 1;
