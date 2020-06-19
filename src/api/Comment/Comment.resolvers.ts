@@ -12,15 +12,25 @@ export class CommentResolver {
     if (!ctxUser.id) throw Error("Log in please");
     const post = await Post.findOne({ where: { id: args.postId } });
     if (!post) throw Error("Post not found");
-    const newComment = await Comment.create({
-      user: ctxUser,
-      post,
-      text: args.text
-    });
-    post.commentCount = post.commentCount + 1;
-    await post.save();
-    await newComment.save();
-    return newComment;
+    try {
+      const newComment = await Comment.create({
+        user: ctxUser,
+        post,
+        text: args.text
+      });
+      post.commentCount = post.commentCount + 1;
+      await post.save();
+      await newComment.save();
+      return {
+        ok: true,
+        error: null
+      };
+    } catch (error) {
+      return {
+        ok: false,
+        error: error.message
+      };
+    }
   }
 
   @Mutation(() => Comment)
@@ -33,9 +43,19 @@ export class CommentResolver {
     if (!comment) throw Error("Comment not found");
     if (comment.user.id !== ctxUser.id)
       throw Error("You don't have a permission");
-    comment.text = args.text;
-    await comment.save();
-    return comment;
+    try {
+      comment.text = args.text;
+      await comment.save();
+      return {
+        ok: true,
+        error: null
+      };
+    } catch (error) {
+      return {
+        ok: false,
+        error: error.message
+      };
+    }
   }
 
   @Mutation(() => Boolean)
@@ -56,9 +76,15 @@ export class CommentResolver {
       await comment.remove();
       post.commentCount = post.commentCount - 1;
       await post.save();
-      return true;
-    } catch {
-      return false;
+      return {
+        ok: true,
+        error: null
+      };
+    } catch (error) {
+      return {
+        ok: false,
+        error: error.message
+      };
     }
   }
 

@@ -13,24 +13,41 @@ export class PostResolver {
     const category = await Category.findOne({
       where: { title: args.category }
     });
-    const newPost = Post.create({
-      title: args.title,
-      text: args.text,
-      user: ctxUser,
-      category
-    });
-    await newPost.save();
-    return newPost;
+    if (!category) throw Error("Category not found");
+    try {
+      const newPost = Post.create({
+        title: args.title,
+        text: args.text,
+        user: ctxUser,
+        category
+      });
+      await newPost.save();
+      return {
+        ok: true,
+        error: null,
+        post: newPost
+      };
+    } catch (error) {
+      return {
+        ok: false,
+        error: error.message,
+        post: null
+      };
+    }
   }
 
   @Query(() => Post)
   async seePostDetail(@Arg("id") id: string) {
     const post = await Post.findOne({
-      relations: ["user", "category", "comments"],
+      relations: ["user", "likes", "comments"],
       where: { id }
     });
     if (!post) throw Error("Post not found");
-    return post;
+    return {
+      ok: true,
+      error: null,
+      post
+    };
   }
 
   @Mutation(() => Post)
@@ -42,11 +59,22 @@ export class PostResolver {
     if (!ctxUser) throw Error("Log in please");
     const post = await Post.findOne({ relations: [`user`], where: { id } });
     if (!post) throw Error("Post not found");
-    if (post.user.id === ctxUser.id) {
+    if (post.user.id !== ctxUser.id) throw Error("You don't have a permission");
+    try {
       await Object.assign(post, args);
       post.save();
-      return post;
-    } else throw Error("You don't have a permission");
+      return {
+        ok: true,
+        error: null,
+        post
+      };
+    } catch (error) {
+      return {
+        ok: false,
+        error: error.message,
+        post: null
+      };
+    }
   }
 
   @Mutation(() => Boolean)
@@ -54,42 +82,53 @@ export class PostResolver {
     if (!ctxUser) throw Error("Log in please");
     const post = await Post.findOne({ relations: ["user"], where: { id } });
     if (!post) throw Error("Post not found");
-    if (post.user.id === ctxUser.id) {
-      try {
-        await post.remove();
-        return true;
-      } catch {
-        return false;
-      }
-    } else throw Error("You don't have a permission");
+    if (post.user.id !== ctxUser.id) throw Error("You don't have a permission");
+    try {
+      await post.remove();
+      return {
+        ok: true,
+        error: null
+      };
+    } catch (error) {
+      return {
+        ok: false,
+        error: error.message
+      };
+    }
   }
 
   @Mutation(() => Post)
   async toggleBookmarkPost(@Arg("id") id: string, @Ctx() ctxUser) {
     if (!ctxUser.id) throw Error("Log in please");
-
     const user = await User.findOne({
       where: { id: ctxUser.id },
       relations: ["bookmarkedPosts"]
     });
     if (!user) throw Error("User not found");
-
     const post = await Post.findOne({ where: { id } });
     if (!post) throw Error("Post not found");
-
-    const isBookmarkedPost = user.bookmarkedPostsIds.includes(Number(id));
-    let cleanBookmarkedPosts: Post[];
-
-    if (isBookmarkedPost) {
-      cleanBookmarkedPosts = user.bookmarkedPosts.filter(
-        (item) => item.id !== post.id
-      );
-    } else {
-      cleanBookmarkedPosts = [...user.bookmarkedPosts, post];
+    try {
+      const isBookmarkedPost = user.bookmarkedPostsIds.includes(Number(id));
+      let cleanBookmarkedPosts: Post[];
+      if (isBookmarkedPost) {
+        cleanBookmarkedPosts = user.bookmarkedPosts.filter(
+          (item) => item.id !== post.id
+        );
+      } else {
+        cleanBookmarkedPosts = [...user.bookmarkedPosts, post];
+      }
+      user.bookmarkedPosts = cleanBookmarkedPosts;
+      await user.save();
+      return {
+        ok: true,
+        error: null
+      };
+    } catch (error) {
+      return {
+        ok: false,
+        error: error.message
+      };
     }
-    user.bookmarkedPosts = cleanBookmarkedPosts;
-    await user.save();
-    return user;
   }
 
   @Query(() => [Post])

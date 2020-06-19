@@ -8,27 +8,36 @@ export class LikeResolver {
   @Mutation(() => Boolean)
   async toggleLikePost(@Arg("id") id: string, @Ctx() ctxUser) {
     if (!ctxUser.id) throw Error("Log in please");
-
     const user = await User.findOne({ where: { id: ctxUser.id } });
     if (!user) throw Error("User not found");
-
     const post = await Post.findOne({ where: { id } });
     if (!post) throw Error("Post not found");
-
-    const existLike = await Like.findOne({
-      where: { userId: user.id, postId: post.id }
-    });
-
-    if (existLike) {
-      existLike.remove();
-      return true;
-    } else {
-      const newLike = Like.create({
-        user,
-        post
+    try {
+      const existLike = await Like.findOne({
+        where: { userId: user.id, postId: post.id }
       });
-      await newLike.save();
-      return true;
+      if (existLike) {
+        existLike.remove();
+        return {
+          ok: true,
+          error: null
+        };
+      } else {
+        const newLike = Like.create({
+          user,
+          post
+        });
+        await newLike.save();
+        return {
+          ok: true,
+          error: null
+        };
+      }
+    } catch (error) {
+      return {
+        ok: false,
+        error: error.message
+      };
     }
   }
 
