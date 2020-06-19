@@ -6,7 +6,7 @@ import { CreateCategoryInput } from "./types/CreateCategoryInput";
 import { DeleteCategoryInput } from "./types/DeleteCategoryInput";
 import { EditCategoryInput } from "./types/EditCategoryInput";
 import { SeePostListInput } from "./types/SeePostListInput";
-import { ToggleFavCategoryInput } from "./types/toggleFavCategoryInput";
+import { ToggleFavCategoryInput } from "./types/ToggleFavCategoryInput";
 
 @Resolver()
 export class CategoryResolver {
@@ -17,7 +17,8 @@ export class CategoryResolver {
       throw Error("You don't have a permission");
     try {
       const newCategory = await Category.create({
-        title: args.title
+        title: args.title,
+        group: args.group
       });
       await newCategory.save();
       return {
@@ -58,15 +59,19 @@ export class CategoryResolver {
   }
 
   @Mutation(() => Category)
-  async editCategory(@Arg("args") args: EditCategoryInput, @Ctx() ctxUser) {
+  async editCategory(
+    @Arg("id") id: string,
+    @Arg("args") args: EditCategoryInput,
+    @Ctx() ctxUser
+  ) {
     if (!ctxUser.id) throw Error("Log in please");
     if (ctxUser.nickname !== "Hoony")
       throw Error("You don't have a permission");
     try {
-      const category = await Category.findOne({ where: { id: args.id } });
+      const category = await Category.findOne({ where: { id } });
       if (!category) throw Error("Category not found");
-      category.title = args.title;
-      category.save();
+      await Object.assign(category, args);
+      await category.save();
       return {
         ok: true,
         error: null,

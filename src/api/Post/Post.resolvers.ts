@@ -54,17 +54,21 @@ export class PostResolver {
   }
 
   @Mutation(() => Post)
-  async editPost(@Arg("args") args: EditPostInput, @Ctx() ctxUser) {
+  async editPost(
+    @Arg("id") id: string,
+    @Arg("args") args: EditPostInput,
+    @Ctx() ctxUser
+  ) {
     if (!ctxUser) throw Error("Log in please");
     const post = await Post.findOne({
-      where: { id: args.id },
+      where: { id },
       relations: [`user`]
     });
     if (!post) throw Error("Post not found");
     if (post.user.id !== ctxUser.id) throw Error("You don't have a permission");
     try {
       await Object.assign(post, args);
-      post.save();
+      await post.save();
       return {
         ok: true,
         error: null,

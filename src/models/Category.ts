@@ -22,6 +22,10 @@ export class Category extends BaseEntity {
 
   @Field(() => String)
   @Column({ type: "text" })
+  group: string;
+
+  @Field(() => String)
+  @Column({ type: "text" })
   title: string;
 
   @Field(() => [Post])

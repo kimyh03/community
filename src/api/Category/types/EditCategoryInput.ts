@@ -3,7 +3,7 @@ import { Field, InputType } from "type-graphql";
 @InputType()
 export class EditCategoryInput {
   @Field()
-  id: string;
+  group: string;
 
   @Field()
   title: string;
