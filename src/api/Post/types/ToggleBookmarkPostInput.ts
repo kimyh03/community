@@ -1,7 +1,7 @@
 import { Field, InputType } from "type-graphql";
 
 @InputType()
-export class SeePostListInput {
+export class ToggleBookmarkPostInput {
   @Field()
   id: string;
 }

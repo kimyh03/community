@@ -3,11 +3,15 @@ import { Category } from "../../models/Category";
 import { Post } from "../../models/Post";
 import { User } from "../../models/User";
 import { CreateCategoryInput } from "./types/CreateCategoryInput";
+import { DeleteCategoryInput } from "./types/DeleteCategoryInput";
+import { EditCategoryInput } from "./types/EditCategoryInput";
+import { SeePostListInput } from "./types/SeePostListInput";
+import { ToggleFavCategoryInput } from "./types/toggleFavCategoryInput";
 
 @Resolver()
 export class CategoryResolver {
   @Mutation(() => Category)
-  async createCategory(@Arg("data") args: CreateCategoryInput, @Ctx() ctxUser) {
+  async createCategory(@Arg("args") args: CreateCategoryInput, @Ctx() ctxUser) {
     if (!ctxUser.id) throw Error("Log in please");
     if (ctxUser.nickname !== "Hoony")
       throw Error("You don't have a permission");
@@ -31,10 +35,10 @@ export class CategoryResolver {
   }
 
   @Query(() => [Post])
-  async seePostList(@Arg("title") title: string) {
+  async seePostList(@Arg("args") args: SeePostListInput) {
     try {
       const category = await Category.findOne({
-        where: { title },
+        where: { id: args.id },
         relations: ["posts"]
       });
       if (!category) throw Error("Category not found");
@@ -54,18 +58,14 @@ export class CategoryResolver {
   }
 
   @Mutation(() => Category)
-  async editCategory(
-    @Arg("id") id: string,
-    @Arg("title") title: string,
-    @Ctx() ctxUser
-  ) {
+  async editCategory(@Arg("args") args: EditCategoryInput, @Ctx() ctxUser) {
     if (!ctxUser.id) throw Error("Log in please");
     if (ctxUser.nickname !== "Hoony")
       throw Error("You don't have a permission");
     try {
-      const category = await Category.findOne({ where: { id } });
+      const category = await Category.findOne({ where: { id: args.id } });
       if (!category) throw Error("Category not found");
-      category.title = title;
+      category.title = args.title;
       category.save();
       return {
         ok: true,
@@ -82,12 +82,12 @@ export class CategoryResolver {
   }
 
   @Mutation(() => Boolean)
-  async deleteCategory(@Arg("title") title: string, @Ctx() ctxUser) {
+  async deleteCategory(@Arg("args") args: DeleteCategoryInput, @Ctx() ctxUser) {
     if (!ctxUser.id) throw Error("Log in please");
     if (ctxUser.nickname !== "Hoony")
       throw Error("You don't have a permission");
     try {
-      const category = await Category.findOne({ where: { title } });
+      const category = await Category.findOne({ where: { id: args.id } });
       if (!category) throw Error("Category not found");
       await category.remove();
       return {
@@ -103,18 +103,21 @@ export class CategoryResolver {
   }
 
   @Mutation(() => User)
-  async toggleFavCategory(@Arg("id") id: string, @Ctx() ctxUser) {
+  async toggleFavCategory(
+    @Arg("args") args: ToggleFavCategoryInput,
+    @Ctx() ctxUser
+  ) {
     if (!ctxUser.id) throw Error("Log in please");
     const user = await User.findOne({
       where: { id: ctxUser.id },
       relations: ["favCategories"]
     });
     if (!user) throw Error("User not found");
-    const category = await Category.findOne({ where: { id } });
+    const category = await Category.findOne({ where: { id: args.id } });
     if (!category) throw Error("Category not found");
     try {
       let cleanFavList = user.favCategories;
-      const isFavCategory = user.favCategoriesIds.includes(Number(id));
+      const isFavCategory = user.favCategoriesIds.includes(Number(args.id));
       if (isFavCategory) {
         cleanFavList = cleanFavList.filter((item) => item.id !== category.id);
       } else {

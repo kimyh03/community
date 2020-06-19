@@ -1,7 +1,7 @@
 import { Field, InputType } from "type-graphql";
 
 @InputType()
-export class SeePostListInput {
+export class DeleteCategoryInput {
   @Field()
   id: string;
 }

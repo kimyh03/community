@@ -3,12 +3,15 @@ import { Category } from "../../models/Category";
 import { Post } from "../../models/Post";
 import { User } from "../../models/User";
 import { CreatePostInput } from "./types/CreatePostInput";
+import { DeletePostInput } from "./types/DeletePostInput";
 import { EditPostInput } from "./types/EditPostInput";
+import { SeePostDetailInput } from "./types/SeePostDetailInput";
+import { ToggleBookmarkPostInput } from "./types/ToggleBookmarkPostInput";
 
 @Resolver()
 export class PostResolver {
   @Mutation(() => Post)
-  async createPost(@Arg("data") args: CreatePostInput, @Ctx() ctxUser) {
+  async createPost(@Arg("args") args: CreatePostInput, @Ctx() ctxUser) {
     if (!ctxUser) throw Error("Log in please");
     const category = await Category.findOne({
       where: { title: args.category }
@@ -37,10 +40,10 @@ export class PostResolver {
   }
 
   @Query(() => Post)
-  async seePostDetail(@Arg("id") id: string) {
+  async seePostDetail(@Arg("args") args: SeePostDetailInput) {
     const post = await Post.findOne({
       relations: ["user", "likes", "comments"],
-      where: { id }
+      where: { id: args.id }
     });
     if (!post) throw Error("Post not found");
     return {
@@ -51,13 +54,12 @@ export class PostResolver {
   }
 
   @Mutation(() => Post)
-  async editPost(
-    @Arg("id") id: string,
-    @Arg("data") args: EditPostInput,
-    @Ctx() ctxUser
-  ) {
+  async editPost(@Arg("args") args: EditPostInput, @Ctx() ctxUser) {
     if (!ctxUser) throw Error("Log in please");
-    const post = await Post.findOne({ relations: [`user`], where: { id } });
+    const post = await Post.findOne({
+      where: { id: args.id },
+      relations: [`user`]
+    });
     if (!post) throw Error("Post not found");
     if (post.user.id !== ctxUser.id) throw Error("You don't have a permission");
     try {
@@ -78,9 +80,12 @@ export class PostResolver {
   }
 
   @Mutation(() => Boolean)
-  async deletePost(@Arg("id") id: string, @Ctx() ctxUser) {
+  async deletePost(@Arg("args") args: DeletePostInput, @Ctx() ctxUser) {
     if (!ctxUser) throw Error("Log in please");
-    const post = await Post.findOne({ relations: ["user"], where: { id } });
+    const post = await Post.findOne({
+      where: { id: args.id },
+      relations: ["user"]
+    });
     if (!post) throw Error("Post not found");
     if (post.user.id !== ctxUser.id) throw Error("You don't have a permission");
     try {
@@ -98,17 +103,22 @@ export class PostResolver {
   }
 
   @Mutation(() => Post)
-  async toggleBookmarkPost(@Arg("id") id: string, @Ctx() ctxUser) {
+  async toggleBookmarkPost(
+    @Arg("args") args: ToggleBookmarkPostInput,
+    @Ctx() ctxUser
+  ) {
     if (!ctxUser.id) throw Error("Log in please");
     const user = await User.findOne({
       where: { id: ctxUser.id },
       relations: ["bookmarkedPosts"]
     });
     if (!user) throw Error("User not found");
-    const post = await Post.findOne({ where: { id } });
+    const post = await Post.findOne({ where: { id: args.id } });
     if (!post) throw Error("Post not found");
     try {
-      const isBookmarkedPost = user.bookmarkedPostsIds.includes(Number(id));
+      const isBookmarkedPost = user.bookmarkedPostsIds.includes(
+        Number(args.id)
+      );
       let cleanBookmarkedPosts: Post[];
       if (isBookmarkedPost) {
         cleanBookmarkedPosts = user.bookmarkedPosts.filter(

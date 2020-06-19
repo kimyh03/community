@@ -2,15 +2,16 @@ import { Arg, Ctx, Mutation, Query, Resolver } from "type-graphql";
 import { Like } from "../../models/Like";
 import { Post } from "../../models/Post";
 import { User } from "../../models/User";
+import { ToggleLikePostInput } from "./types/ToggleLikePostInput";
 
 @Resolver()
 export class LikeResolver {
   @Mutation(() => Boolean)
-  async toggleLikePost(@Arg("id") id: string, @Ctx() ctxUser) {
+  async toggleLikePost(@Arg("args") args: ToggleLikePostInput, @Ctx() ctxUser) {
     if (!ctxUser.id) throw Error("Log in please");
     const user = await User.findOne({ where: { id: ctxUser.id } });
     if (!user) throw Error("User not found");
-    const post = await Post.findOne({ where: { id } });
+    const post = await Post.findOne({ where: { id: args.id } });
     if (!post) throw Error("Post not found");
     try {
       const existLike = await Like.findOne({
