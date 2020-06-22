@@ -3,7 +3,7 @@ import { Field, InputType } from "type-graphql";
 @InputType()
 export class CreatePostInput {
   @Field()
-  category: string;
+  categoryId: string;
 
   @Field()
   title: string;

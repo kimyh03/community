@@ -3,14 +3,19 @@ import { Category } from "../../models/Category";
 import { Post } from "../../models/Post";
 import { User } from "../../models/User";
 import { CreateCategoryInput } from "./types/CreateCategoryInput";
+import { CreateCategoryResponse } from "./types/CreateCategoryResponse";
 import { DeleteCategoryInput } from "./types/DeleteCategoryInput";
+import { DeleteCategoryResponse } from "./types/DeleteCategoryResponse";
 import { EditCategoryInput } from "./types/EditCategoryInput";
+import { EditCategoryResponse } from "./types/EditCategoryResponse";
 import { SeePostListInput } from "./types/SeePostListInput";
+import { SeePostListResponse } from "./types/SeePostListResponse";
 import { ToggleFavCategoryInput } from "./types/ToggleFavCategoryInput";
+import { ToggleFavCategoryResponse } from "./types/ToggleFavCategoryResponse";
 
 @Resolver()
 export class CategoryResolver {
-  @Mutation(() => Category)
+  @Mutation(() => CreateCategoryResponse)
   async createCategory(@Arg("args") args: CreateCategoryInput, @Ctx() ctxUser) {
     if (!ctxUser.id) throw Error("Log in please");
     if (ctxUser.nickname !== "Hoony")
@@ -28,22 +33,24 @@ export class CategoryResolver {
       };
     } catch (error) {
       return {
-        ok: true,
+        ok: false,
         error: error.message,
         category: null
       };
     }
   }
 
-  @Query(() => [Post])
+  @Query(() => SeePostListResponse)
   async seePostList(@Arg("args") args: SeePostListInput) {
+    const TAKE = 3;
     try {
-      const category = await Category.findOne({
-        where: { id: args.id },
-        relations: ["posts"]
+      const posts = await Post.find({
+        where: { categoryId: args.id },
+        relations: ["category", "user"],
+        take: TAKE,
+        skip: args.page * TAKE
       });
-      if (!category) throw Error("Category not found");
-      const posts = category.posts;
+      if (!posts) throw Error("Post not found");
       return {
         ok: true,
         error: null,
@@ -58,7 +65,7 @@ export class CategoryResolver {
     }
   }
 
-  @Mutation(() => Category)
+  @Mutation(() => EditCategoryResponse)
   async editCategory(
     @Arg("id") id: string,
     @Arg("args") args: EditCategoryInput,
@@ -86,7 +93,7 @@ export class CategoryResolver {
     }
   }
 
-  @Mutation(() => Boolean)
+  @Mutation(() => DeleteCategoryResponse)
   async deleteCategory(@Arg("args") args: DeleteCategoryInput, @Ctx() ctxUser) {
     if (!ctxUser.id) throw Error("Log in please");
     if (ctxUser.nickname !== "Hoony")
@@ -107,7 +114,7 @@ export class CategoryResolver {
     }
   }
 
-  @Mutation(() => User)
+  @Mutation(() => ToggleFavCategoryResponse)
   async toggleFavCategory(
     @Arg("args") args: ToggleFavCategoryInput,
     @Ctx() ctxUser

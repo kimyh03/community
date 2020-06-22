@@ -3,18 +3,20 @@ import { Category } from "../../models/Category";
 import { Post } from "../../models/Post";
 import { User } from "../../models/User";
 import { CreatePostInput } from "./types/CreatePostInput";
+import { CreatePostResponse } from "./types/CreatePostResponse";
 import { DeletePostInput } from "./types/DeletePostInput";
+import { DeletePostResponse } from "./types/DeletePostResponse";
 import { EditPostInput } from "./types/EditPostInput";
 import { SeePostDetailInput } from "./types/SeePostDetailInput";
 import { ToggleBookmarkPostInput } from "./types/ToggleBookmarkPostInput";
 
 @Resolver()
 export class PostResolver {
-  @Mutation(() => Post)
+  @Mutation(() => CreatePostResponse)
   async createPost(@Arg("args") args: CreatePostInput, @Ctx() ctxUser) {
     if (!ctxUser) throw Error("Log in please");
     const category = await Category.findOne({
-      where: { title: args.category }
+      where: { id: args.categoryId }
     });
     if (!category) throw Error("Category not found");
     try {
@@ -83,15 +85,12 @@ export class PostResolver {
     }
   }
 
-  @Mutation(() => Boolean)
+  @Mutation(() => DeletePostResponse)
   async deletePost(@Arg("args") args: DeletePostInput, @Ctx() ctxUser) {
     if (!ctxUser) throw Error("Log in please");
-    const post = await Post.findOne({
-      where: { id: args.id },
-      relations: ["user"]
-    });
+    const post = await Post.findOne({ where: { id: args.id } });
     if (!post) throw Error("Post not found");
-    if (post.user.id !== ctxUser.id) throw Error("You don't have a permission");
+    if (post.userId !== ctxUser.id) throw Error("You don't have a permission");
     try {
       await post.remove();
       return {
@@ -148,7 +147,7 @@ export class PostResolver {
   @Query(() => [Post])
   async posts() {
     const posts = await Post.find({
-      relations: ["likes", "comments", "bookMakedUsers"]
+      relations: ["category", "likes", "comments", "bookMakedUsers"]
     });
     return posts;
   }

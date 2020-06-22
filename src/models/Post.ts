@@ -9,6 +9,7 @@ import {
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
+  RelationId,
   UpdateDateColumn
 } from "typeorm";
 import { Category } from "./Category";
@@ -29,11 +30,19 @@ export class Post extends BaseEntity {
   })
   category: Category;
 
+  @Field(() => Number)
+  @RelationId((post: Post) => post.category)
+  categoryId: number;
+
   @Field(() => User)
   @ManyToOne((type) => User, (user) => user.posts, {
     onDelete: "CASCADE"
   })
   user: User;
+
+  @Field(() => Number)
+  @RelationId((post: Post) => post.user)
+  userId: number;
 
   @Field(() => String)
   @Column({ type: "text" })

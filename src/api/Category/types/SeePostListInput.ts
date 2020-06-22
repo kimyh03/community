@@ -4,4 +4,7 @@ import { Field, InputType } from "type-graphql";
 export class SeePostListInput {
   @Field()
   id: string;
+
+  @Field()
+  page: number;
 }
