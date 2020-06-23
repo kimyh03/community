@@ -1,19 +1,25 @@
 import { Arg, Ctx, Mutation, Query, Resolver } from "type-graphql";
+import { getRepository } from "typeorm";
 import { Category } from "../../models/Category";
 import { Post } from "../../models/Post";
 import { User } from "../../models/User";
+import { PostResponseInterface } from "../../utils/ResponseInterface";
 import { CreatePostInput } from "./types/CreatePostInput";
-import { CreatePostResponse } from "./types/CreatePostResponse";
 import { DeletePostInput } from "./types/DeletePostInput";
-import { DeletePostResponse } from "./types/DeletePostResponse";
 import { EditPostInput } from "./types/EditPostInput";
+import { PostResponseObjectType } from "./types/PostResponeseObjectType";
 import { SeePostDetailInput } from "./types/SeePostDetailInput";
+import { SeePostListInput } from "./types/SeePostListInput";
+import { SeePostListResponse } from "./types/SeePostListResponse";
 import { ToggleBookmarkPostInput } from "./types/ToggleBookmarkPostInput";
 
 @Resolver()
 export class PostResolver {
-  @Mutation(() => CreatePostResponse)
-  async createPost(@Arg("args") args: CreatePostInput, @Ctx() ctxUser) {
+  @Mutation(() => PostResponseObjectType)
+  async createPost(
+    @Arg("args") args: CreatePostInput,
+    @Ctx() ctxUser
+  ): Promise<PostResponseInterface> {
     if (!ctxUser) throw Error("Log in please");
     const category = await Category.findOne({
       where: { id: args.categoryId }
@@ -24,6 +30,7 @@ export class PostResolver {
         title: args.title,
         text: args.text,
         user: ctxUser,
+        userName: ctxUser.nickname,
         category
       });
       await newPost.save();
@@ -41,8 +48,10 @@ export class PostResolver {
     }
   }
 
-  @Query(() => Post)
-  async seePostDetail(@Arg("args") args: SeePostDetailInput) {
+  @Query(() => PostResponseObjectType)
+  async seePostDetail(
+    @Arg("args") args: SeePostDetailInput
+  ): Promise<PostResponseInterface> {
     const post = await Post.findOne({
       relations: ["user", "likes", "comments"],
       where: { id: args.id }
@@ -55,12 +64,12 @@ export class PostResolver {
     };
   }
 
-  @Mutation(() => Post)
+  @Mutation(() => PostResponseObjectType)
   async editPost(
     @Arg("id") id: string,
     @Arg("args") args: EditPostInput,
     @Ctx() ctxUser
-  ) {
+  ): Promise<PostResponseInterface> {
     if (!ctxUser) throw Error("Log in please");
     const post = await Post.findOne({
       where: { id },
@@ -85,8 +94,11 @@ export class PostResolver {
     }
   }
 
-  @Mutation(() => DeletePostResponse)
-  async deletePost(@Arg("args") args: DeletePostInput, @Ctx() ctxUser) {
+  @Mutation(() => PostResponseObjectType)
+  async deletePost(
+    @Arg("args") args: DeletePostInput,
+    @Ctx() ctxUser
+  ): Promise<PostResponseInterface> {
     if (!ctxUser) throw Error("Log in please");
     const post = await Post.findOne({ where: { id: args.id } });
     if (!post) throw Error("Post not found");
@@ -105,11 +117,36 @@ export class PostResolver {
     }
   }
 
-  @Mutation(() => Post)
+  @Query(() => SeePostListResponse)
+  async seePostList(@Arg("args") args: SeePostListInput) {
+    const TAKE = 20;
+    try {
+      const postRepository = await getRepository(Post);
+      const posts = await postRepository.find({
+        where: { categoryId: args.categoryId },
+        take: TAKE,
+        skip: args.page * TAKE
+      });
+      if (posts?.length === 0) throw Error("Post not found");
+      return {
+        ok: true,
+        error: null,
+        posts
+      };
+    } catch (error) {
+      return {
+        ok: false,
+        error: error.message,
+        posts: null
+      };
+    }
+  }
+
+  @Mutation(() => PostResponseObjectType)
   async toggleBookmarkPost(
     @Arg("args") args: ToggleBookmarkPostInput,
     @Ctx() ctxUser
-  ) {
+  ): Promise<PostResponseInterface> {
     if (!ctxUser.id) throw Error("Log in please");
     const user = await User.findOne({
       where: { id: ctxUser.id },

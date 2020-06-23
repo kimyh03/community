@@ -32,6 +32,7 @@ export class Post extends BaseEntity {
 
   @Field(() => Number)
   @RelationId((post: Post) => post.category)
+  @Column()
   categoryId: number;
 
   @Field(() => User)
@@ -43,6 +44,10 @@ export class Post extends BaseEntity {
   @Field(() => Number)
   @RelationId((post: Post) => post.user)
   userId: number;
+
+  @Field(() => String)
+  @Column({ type: "text" })
+  userName: string;
 
   @Field(() => String)
   @Column({ type: "text" })
