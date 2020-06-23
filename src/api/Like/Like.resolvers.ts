@@ -1,21 +1,23 @@
 import { Arg, Ctx, Mutation, Query, Resolver } from "type-graphql";
 import { Like } from "../../models/Like";
 import { Post } from "../../models/Post";
-import { User } from "../../models/User";
+import { LikeResponseInterface } from "../../utils/ResponseInterface";
 import { ToggleLikePostInput } from "./types/ToggleLikePostInput";
+import { ToggleLikePostResponse } from "./types/ToggleLikePostResponse";
 
 @Resolver()
 export class LikeResolver {
-  @Mutation(() => Boolean)
-  async toggleLikePost(@Arg("args") args: ToggleLikePostInput, @Ctx() ctxUser) {
+  @Mutation(() => ToggleLikePostResponse)
+  async toggleLikePost(
+    @Arg("args") args: ToggleLikePostInput,
+    @Ctx() ctxUser
+  ): Promise<LikeResponseInterface> {
     if (!ctxUser.id) throw Error("Log in please");
-    const user = await User.findOne({ where: { id: ctxUser.id } });
-    if (!user) throw Error("User not found");
     const post = await Post.findOne({ where: { id: args.id } });
     if (!post) throw Error("Post not found");
     try {
       const existLike = await Like.findOne({
-        where: { userId: user.id, postId: post.id }
+        where: { userId: ctxUser.id, postId: post.id }
       });
       if (existLike) {
         existLike.remove();
@@ -25,7 +27,7 @@ export class LikeResolver {
         };
       } else {
         const newLike = Like.create({
-          user,
+          user: ctxUser,
           post
         });
         await newLike.save();

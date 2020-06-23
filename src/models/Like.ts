@@ -1,6 +1,7 @@
 import { Field, ID, ObjectType } from "type-graphql";
 import {
   BaseEntity,
+  Column,
   CreateDateColumn,
   Entity,
   ManyToOne,
@@ -26,6 +27,7 @@ export class Like extends BaseEntity {
 
   @Field(() => Number)
   @RelationId((like: Like) => like.user)
+  @Column({ nullable: true })
   userId: number;
 
   @Field(() => Post)
@@ -36,6 +38,7 @@ export class Like extends BaseEntity {
 
   @Field(() => Number)
   @RelationId((like: Like) => like.post)
+  @Column({ nullable: true })
   postId: number;
 
   @Field(() => String)
