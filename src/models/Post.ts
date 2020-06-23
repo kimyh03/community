@@ -9,6 +9,7 @@ import {
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
+  RelationCount,
   RelationId,
   UpdateDateColumn
 } from "typeorm";
@@ -66,7 +67,7 @@ export class Post extends BaseEntity {
   likes: Like[];
 
   @Field(() => Number)
-  @Column({ type: "integer", default: 0 })
+  @RelationCount((post: Post) => post.likes)
   likeCount: number;
 
   @Field(() => [Comment])
@@ -74,7 +75,7 @@ export class Post extends BaseEntity {
   comments: Comment[];
 
   @Field(() => Number)
-  @Column({ type: "integer", default: 0 })
+  @RelationCount((post: Post) => post.comments)
   commentCount: number;
 
   @Field(() => [User])

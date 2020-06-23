@@ -9,6 +9,7 @@ import {
   ManyToMany,
   OneToMany,
   PrimaryGeneratedColumn,
+  RelationCount,
   RelationId,
   UpdateDateColumn
 } from "typeorm";
@@ -55,7 +56,7 @@ export class User extends BaseEntity {
   posts: Post[];
 
   @Field(() => Number)
-  @Column({ type: "integer", default: 0 })
+  @RelationCount((user: User) => user.posts)
   postCount: number;
 
   @Field(() => Boolean)
