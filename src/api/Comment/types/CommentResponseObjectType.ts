@@ -1,8 +1,8 @@
 import { Field, ObjectType } from "type-graphql";
-import { Category } from "../../../models/Category";
+import { Comment } from "../../../models/Comment";
 
 @ObjectType()
-export class CreateCategoryResponse {
+export class CommentResponseObjectType {
   @Field()
   ok: boolean;
 
@@ -10,5 +10,5 @@ export class CreateCategoryResponse {
   error: string;
 
   @Field({ nullable: true })
-  category: Category;
+  comment: Comment;
 }

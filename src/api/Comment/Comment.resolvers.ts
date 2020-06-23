@@ -1,14 +1,19 @@
 import { Arg, Ctx, Mutation, Query, Resolver } from "type-graphql";
 import { Comment } from "../../models/Comment";
 import { Post } from "../../models/Post";
+import { CommentResponseInterface } from "../../utils/ResponseInterface";
+import { CommentResponseObjectType } from "./types/CommentResponseObjectType";
 import { CreateCommentInput } from "./types/CreateCommnetInput";
 import { DeleteCommentInput } from "./types/DeleteCommentInput";
 import { EditCommentInput } from "./types/EditCommentInput";
 
 @Resolver()
 export class CommentResolver {
-  @Mutation(() => Comment)
-  async createComment(@Arg("args") args: CreateCommentInput, @Ctx() ctxUser) {
+  @Mutation(() => CommentResponseObjectType)
+  async createComment(
+    @Arg("args") args: CreateCommentInput,
+    @Ctx() ctxUser
+  ): Promise<CommentResponseInterface> {
     if (!ctxUser.id) throw Error("Log in please");
     const post = await Post.findOne({ where: { id: args.postId } });
     if (!post) throw Error("Post not found");
@@ -33,8 +38,11 @@ export class CommentResolver {
     }
   }
 
-  @Mutation(() => Comment)
-  async editComment(@Arg("args") args: EditCommentInput, @Ctx() ctxUser) {
+  @Mutation(() => CommentResponseObjectType)
+  async editComment(
+    @Arg("args") args: EditCommentInput,
+    @Ctx() ctxUser
+  ): Promise<CommentResponseInterface> {
     if (!ctxUser.id) throw Error("Log in please");
     const comment = await Comment.findOne({
       where: { id: args.commentId },
@@ -58,8 +66,11 @@ export class CommentResolver {
     }
   }
 
-  @Mutation(() => Boolean)
-  async deleteComment(@Arg("args") args: DeleteCommentInput, @Ctx() ctxUser) {
+  @Mutation(() => CommentResponseObjectType)
+  async deleteComment(
+    @Arg("args") args: DeleteCommentInput,
+    @Ctx() ctxUser
+  ): Promise<CommentResponseInterface> {
     if (!ctxUser.id) throw Error("Log in please");
     const comment = await Comment.findOne({
       where: { id: args.commentId },

@@ -3,7 +3,7 @@ import { Field, InputType } from "type-graphql";
 @InputType()
 export class SeePostListInput {
   @Field()
-  id: string;
+  categoryId: number;
 
   @Field()
   page: number;

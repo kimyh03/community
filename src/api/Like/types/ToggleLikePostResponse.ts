@@ -1,8 +1,8 @@
 import { Field, ObjectType } from "type-graphql";
-import { Category } from "../../../models/Category";
+import { Like } from "../../../models/Like";
 
 @ObjectType()
-export class EditCategoryResponse {
+export class ToggleLikePostResponse {
   @Field()
   ok: boolean;
 
@@ -10,5 +10,5 @@ export class EditCategoryResponse {
   error: string;
 
   @Field({ nullable: true })
-  category: Category;
+  like: Like;
 }

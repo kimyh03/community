@@ -1,22 +1,20 @@
 import { Arg, Ctx, Mutation, Query, Resolver } from "type-graphql";
 import { Category } from "../../models/Category";
-import { Post } from "../../models/Post";
 import { User } from "../../models/User";
+import { CategoryResponseInterface } from "../../utils/ResponseInterface";
+import { CategoryResponseObjectType } from "./types/CategoryResponseObjectType";
 import { CreateCategoryInput } from "./types/CreateCategoryInput";
-import { CreateCategoryResponse } from "./types/CreateCategoryResponse";
 import { DeleteCategoryInput } from "./types/DeleteCategoryInput";
-import { DeleteCategoryResponse } from "./types/DeleteCategoryResponse";
 import { EditCategoryInput } from "./types/EditCategoryInput";
-import { EditCategoryResponse } from "./types/EditCategoryResponse";
-import { SeePostListInput } from "./types/SeePostListInput";
-import { SeePostListResponse } from "./types/SeePostListResponse";
 import { ToggleFavCategoryInput } from "./types/ToggleFavCategoryInput";
-import { ToggleFavCategoryResponse } from "./types/ToggleFavCategoryResponse";
 
 @Resolver()
 export class CategoryResolver {
-  @Mutation(() => CreateCategoryResponse)
-  async createCategory(@Arg("args") args: CreateCategoryInput, @Ctx() ctxUser) {
+  @Mutation(() => CategoryResponseObjectType)
+  async createCategory(
+    @Arg("args") args: CreateCategoryInput,
+    @Ctx() ctxUser
+  ): Promise<CategoryResponseInterface> {
     if (!ctxUser.id) throw Error("Log in please");
     if (ctxUser.nickname !== "Hoony")
       throw Error("You don't have a permission");
@@ -40,37 +38,12 @@ export class CategoryResolver {
     }
   }
 
-  @Query(() => SeePostListResponse)
-  async seePostList(@Arg("args") args: SeePostListInput) {
-    const TAKE = 3;
-    try {
-      const posts = await Post.find({
-        where: { categoryId: args.id },
-        relations: ["category", "user"],
-        take: TAKE,
-        skip: args.page * TAKE
-      });
-      if (!posts) throw Error("Post not found");
-      return {
-        ok: true,
-        error: null,
-        posts
-      };
-    } catch (error) {
-      return {
-        ok: false,
-        error: error.message,
-        posts: null
-      };
-    }
-  }
-
-  @Mutation(() => EditCategoryResponse)
+  @Mutation(() => CategoryResponseObjectType)
   async editCategory(
     @Arg("id") id: string,
     @Arg("args") args: EditCategoryInput,
     @Ctx() ctxUser
-  ) {
+  ): Promise<CategoryResponseInterface> {
     if (!ctxUser.id) throw Error("Log in please");
     if (ctxUser.nickname !== "Hoony")
       throw Error("You don't have a permission");
@@ -93,8 +66,11 @@ export class CategoryResolver {
     }
   }
 
-  @Mutation(() => DeleteCategoryResponse)
-  async deleteCategory(@Arg("args") args: DeleteCategoryInput, @Ctx() ctxUser) {
+  @Mutation(() => CategoryResponseObjectType)
+  async deleteCategory(
+    @Arg("args") args: DeleteCategoryInput,
+    @Ctx() ctxUser
+  ): Promise<CategoryResponseInterface> {
     if (!ctxUser.id) throw Error("Log in please");
     if (ctxUser.nickname !== "Hoony")
       throw Error("You don't have a permission");
@@ -114,11 +90,11 @@ export class CategoryResolver {
     }
   }
 
-  @Mutation(() => ToggleFavCategoryResponse)
+  @Mutation(() => CategoryResponseObjectType)
   async toggleFavCategory(
     @Arg("args") args: ToggleFavCategoryInput,
     @Ctx() ctxUser
-  ) {
+  ): Promise<CategoryResponseInterface> {
     if (!ctxUser.id) throw Error("Log in please");
     const user = await User.findOne({
       where: { id: ctxUser.id },
