@@ -57,6 +57,8 @@ export class PostResolver {
       where: { id: args.id }
     });
     if (!post) throw Error("Post not found");
+    post.viewCount += 1;
+    post.save();
     return {
       ok: true,
       error: null,
