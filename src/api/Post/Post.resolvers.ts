@@ -3,7 +3,7 @@ import { getRepository } from "typeorm";
 import { Category } from "../../models/Category";
 import { Post } from "../../models/Post";
 import { User } from "../../models/User";
-import { PostResponseInterface } from "../../utils/ResponseInterface";
+import { PostResponseInterface } from "../ResponseInterface";
 import { CreatePostInput } from "./types/CreatePostInput";
 import { DeletePostInput } from "./types/DeletePostInput";
 import { EditPostInput } from "./types/EditPostInput";
@@ -20,7 +20,7 @@ export class PostResolver {
     @Arg("args") args: CreatePostInput,
     @Ctx() ctxUser
   ): Promise<PostResponseInterface> {
-    if (!ctxUser) throw Error("Log in please");
+    if (!ctxUser.id) throw Error("Log in please");
     const category = await Category.findOne({
       where: { id: args.categoryId }
     });
@@ -72,7 +72,7 @@ export class PostResolver {
     @Arg("args") args: EditPostInput,
     @Ctx() ctxUser
   ): Promise<PostResponseInterface> {
-    if (!ctxUser) throw Error("Log in please");
+    if (!ctxUser.id) throw Error("Log in please");
     const post = await Post.findOne({
       where: { id },
       relations: [`user`]
@@ -101,7 +101,7 @@ export class PostResolver {
     @Arg("args") args: DeletePostInput,
     @Ctx() ctxUser
   ): Promise<PostResponseInterface> {
-    if (!ctxUser) throw Error("Log in please");
+    if (!ctxUser.id) throw Error("Log in please");
     const post = await Post.findOne({ where: { id: args.id } });
     if (!post) throw Error("Post not found");
     if (post.userId !== ctxUser.id) throw Error("You don't have a permission");
@@ -120,7 +120,9 @@ export class PostResolver {
   }
 
   @Query(() => SeePostListResponse)
-  async seePostList(@Arg("args") args: SeePostListInput) {
+  async seePostList(
+    @Arg("args") args: SeePostListInput
+  ): Promise<PostResponseInterface> {
     const TAKE = 20;
     try {
       const postRepository = await getRepository(Post);

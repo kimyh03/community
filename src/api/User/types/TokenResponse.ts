@@ -1,7 +1,7 @@
 import { Field, ObjectType } from "type-graphql";
 
 @ObjectType()
-export class SignUpResponse {
+export class TokenResponse {
   @Field(() => Boolean)
   ok: boolean;
 

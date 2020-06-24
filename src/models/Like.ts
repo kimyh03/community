@@ -41,6 +41,10 @@ export class Like extends BaseEntity {
   @Column({ nullable: true })
   postId: number;
 
+  @Field(() => User)
+  @ManyToOne((type) => User, (user) => user.likesReceived)
+  postUser: User;
+
   @Field(() => String)
   @CreateDateColumn()
   createdAt: string;

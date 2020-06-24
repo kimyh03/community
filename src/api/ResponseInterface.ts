@@ -13,7 +13,8 @@ export interface CategoryResponseInterface {
 export interface PostResponseInterface {
   ok: boolean;
   error: string | null;
-  post?: Post | Post[] | null;
+  post?: Post | null;
+  posts?: Post[] | null;
 }
 export interface CommentResponseInterface {
   ok: boolean;
@@ -29,4 +30,5 @@ export interface UserResponseInterface {
   ok: boolean;
   error: string | null;
   user?: User | null;
+  token?: string | null;
 }

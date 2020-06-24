@@ -7,7 +7,7 @@ export class SignUpInput {
   nickname: string;
 
   @Field()
-  userId: string;
+  accountId: string;
 
   @Field()
   password: string;

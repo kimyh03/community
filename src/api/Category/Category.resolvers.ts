@@ -1,7 +1,7 @@
 import { Arg, Ctx, Mutation, Query, Resolver } from "type-graphql";
 import { Category } from "../../models/Category";
 import { User } from "../../models/User";
-import { CategoryResponseInterface } from "../../utils/ResponseInterface";
+import { CategoryResponseInterface } from "../ResponseInterface";
 import { CategoryResponseObjectType } from "./types/CategoryResponseObjectType";
 import { CreateCategoryInput } from "./types/CreateCategoryInput";
 import { DeleteCategoryInput } from "./types/DeleteCategoryInput";

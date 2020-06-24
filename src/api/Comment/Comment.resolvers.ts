@@ -1,7 +1,7 @@
 import { Arg, Ctx, Mutation, Query, Resolver } from "type-graphql";
 import { Comment } from "../../models/Comment";
 import { Post } from "../../models/Post";
-import { CommentResponseInterface } from "../../utils/ResponseInterface";
+import { CommentResponseInterface } from "../ResponseInterface";
 import { CommentResponseObjectType } from "./types/CommentResponseObjectType";
 import { CreateCommentInput } from "./types/CreateCommnetInput";
 import { DeleteCommentInput } from "./types/DeleteCommentInput";

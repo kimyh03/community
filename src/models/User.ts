@@ -30,8 +30,8 @@ export class User extends BaseEntity {
   nickname: string;
 
   @Field(() => String)
-  @Column({ type: "text" })
-  userId: string;
+  @Column({ type: "text", nullable: true })
+  accountId: string;
 
   @Field(() => String)
   @Column({ type: "text" })
@@ -41,6 +41,10 @@ export class User extends BaseEntity {
   @Column({ type: "text" })
   @IsEmail()
   email: string;
+
+  @Field(() => String, { nullable: true })
+  @Column({ type: "text", nullable: true })
+  bio: string;
 
   @Field(() => [Category])
   @ManyToMany((type) => Category, (category) => category.haveFavUsers)
@@ -59,10 +63,6 @@ export class User extends BaseEntity {
   @RelationCount((user: User) => user.posts)
   postCount: number;
 
-  @Field(() => Boolean)
-  @Column({ type: "boolean", default: false })
-  isPrivateMyPosts: boolean;
-
   @Field(() => [Comment])
   @OneToMany((type) => Comment, (comment) => comment.user)
   comments: Comment[];
@@ -70,6 +70,14 @@ export class User extends BaseEntity {
   @Field(() => [Like])
   @OneToMany((type) => Like, (like) => like.user)
   likes: Like[];
+
+  @Field(() => [Like])
+  @OneToMany((type) => Like, (like) => like.postUser)
+  likesReceived: Like[];
+
+  @Field(() => Number)
+  @RelationCount((user: User) => user.likesReceived)
+  likesReceivedCount: number;
 
   @Field(() => [Post])
   @ManyToMany((type) => Post, (post) => post.bookMakedUsers)
@@ -82,7 +90,15 @@ export class User extends BaseEntity {
 
   @Field(() => Boolean)
   @Column({ type: "boolean", default: false })
-  isbanned: boolean;
+  isMaster: boolean;
+
+  @Field(() => Boolean)
+  @Column({ type: "boolean", default: false })
+  isPartner: boolean;
+
+  @Field(() => Boolean)
+  @Column({ type: "boolean", default: false })
+  isBanned: boolean;
 
   @Field(() => String)
   @CreateDateColumn()
