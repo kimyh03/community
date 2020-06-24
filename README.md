@@ -13,15 +13,12 @@
 ### User resolvers
 
 - [x] Create account
-- [ ] Login
-- [ ] Delete account
-- [ ] Find password
-- [ ] See user porofile
-- [ ] See my profile
-- [ ] Edit my profile
+- [x] Login(confirm secret)
+- [x] Delete account
+- [x] See user porofile
+- [x] Edit my profile
 - [ ] Toggle isBanned
 - [ ] Toggle isPartner
-- [ ] Toggle isMaster
 
 ### Post resolvers
 
