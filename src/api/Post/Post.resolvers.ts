@@ -9,7 +9,6 @@ import { DeletePostInput } from "./types/DeletePostInput";
 import { EditPostInput } from "./types/EditPostInput";
 import { PostResponseObjectType } from "./types/PostResponeseObjectType";
 import { SeePostDetailInput } from "./types/SeePostDetailInput";
-import { SeePostListInput } from "./types/SeePostListInput";
 import { SeePostListResponse } from "./types/SeePostListResponse";
 import { ToggleBookmarkPostInput } from "./types/ToggleBookmarkPostInput";
 
@@ -22,7 +21,7 @@ export class PostResolver {
   ): Promise<PostResponseInterface> {
     if (!ctxUser.id) throw Error("Log in please");
     const category = await Category.findOne({
-      where: { id: args.categoryId }
+      where: { title: args.categoryTitle }
     });
     if (!category) throw Error("Category not found");
     try {
@@ -31,7 +30,8 @@ export class PostResolver {
         text: args.text,
         user: ctxUser,
         userName: ctxUser.nickname,
-        category
+        category,
+        categoryTitle: category.title
       });
       await newPost.save();
       return {
@@ -121,15 +121,16 @@ export class PostResolver {
 
   @Query(() => SeePostListResponse)
   async seePostList(
-    @Arg("args") args: SeePostListInput
+    @Arg("categoryTitle") categoryTitle: string,
+    @Arg("page") page: number
   ): Promise<PostResponseInterface> {
-    const TAKE = 20;
+    const TAKE = 10;
     try {
       const postRepository = await getRepository(Post);
       const posts = await postRepository.find({
-        where: { categoryId: args.categoryId },
+        where: { categoryTitle },
         take: TAKE,
-        skip: args.page * TAKE
+        skip: (page - 1) * TAKE
       });
       if (posts?.length === 0) throw Error("Post not found");
       return {
