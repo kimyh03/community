@@ -36,6 +36,10 @@ export class Post extends BaseEntity {
   @Column()
   categoryId: number;
 
+  @Field(() => String)
+  @Column({ type: "text", nullable: true })
+  categoryTitle: string;
+
   @Field(() => User)
   @ManyToOne((type) => User, (user) => user.posts, {
     onDelete: "CASCADE"
@@ -83,11 +87,11 @@ export class Post extends BaseEntity {
   @JoinTable()
   bookMakedUsers: User[];
 
-  @Field(() => String)
-  @CreateDateColumn()
-  createdAt: string;
+  @Field(() => Date)
+  @CreateDateColumn({ type: "timestamp" })
+  createdAt: Date;
 
-  @Field(() => String)
-  @UpdateDateColumn()
-  updatedAt: string;
+  @Field(() => Date)
+  @UpdateDateColumn({ type: "timestamp" })
+  updatedAt: Date;
 }
