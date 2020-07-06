@@ -6,28 +6,32 @@ import { UserResponseInterface } from "../ResponseInterface";
 import { ChangePasswordInput } from "./types/ChangePasswordInput";
 import { DeleteAccountInput } from "./types/DeleteAccountInput";
 import { EditProfileInput } from "./types/EditProfileInput";
-import { SignUpInput } from "./types/SignUpInput";
 import { TokenResponse } from "./types/TokenResponse";
 import { UserResponseObjectType } from "./types/UserResponseObjectType";
 
 @Resolver()
 export class UserResolver {
   @Mutation(() => TokenResponse)
-  async signUp(@Arg("data") args: SignUpInput): Promise<UserResponseInterface> {
+  async signUp(
+    @Arg("nickname") nickname: string,
+    @Arg("accountId") accountId: string,
+    @Arg("password") password: string,
+    @Arg("email") email: string
+  ): Promise<UserResponseInterface> {
     try {
-      const existUser = await User.findOne({ where: { email: args.email } });
+      const existUser = await User.findOne({ where: { email } });
       if (existUser?.id) {
         return {
           ok: false,
           error: "You have a account, Log in Please"
         };
       } else {
-        const hashedPassword = await encryptToHash(args.password);
+        const hashedPassword = await encryptToHash(password);
         const newUser = await User.create({
-          email: args.email,
-          accountId: args.accountId,
+          email,
+          accountId,
           password: hashedPassword,
-          nickname: args.nickname
+          nickname
         });
         await newUser.save();
         const token = await createJWT(newUser.id);
@@ -45,7 +49,7 @@ export class UserResolver {
     }
   }
 
-  @Query(() => TokenResponse)
+  @Mutation(() => TokenResponse)
   async signIn(
     @Arg("accountId") accountId: string,
     @Arg("password") password: string

@@ -8,7 +8,6 @@ import { CreatePostInput } from "./types/CreatePostInput";
 import { DeletePostInput } from "./types/DeletePostInput";
 import { EditPostInput } from "./types/EditPostInput";
 import { PostResponseObjectType } from "./types/PostResponeseObjectType";
-import { SeePostDetailInput } from "./types/SeePostDetailInput";
 import { SeePostListResponse } from "./types/SeePostListResponse";
 import { ToggleBookmarkPostInput } from "./types/ToggleBookmarkPostInput";
 
@@ -49,12 +48,10 @@ export class PostResolver {
   }
 
   @Query(() => PostResponseObjectType)
-  async seePostDetail(
-    @Arg("args") args: SeePostDetailInput
-  ): Promise<PostResponseInterface> {
+  async seePostDetail(@Arg("id") id: string): Promise<PostResponseInterface> {
     const post = await Post.findOne({
       relations: ["user", "likes", "comments"],
-      where: { id: args.id }
+      where: { id }
     });
     if (!post) throw Error("Post not found");
     post.viewCount += 1;
