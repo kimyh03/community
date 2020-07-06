@@ -6,8 +6,6 @@ import { UserResponseInterface } from "../ResponseInterface";
 import { ChangePasswordInput } from "./types/ChangePasswordInput";
 import { DeleteAccountInput } from "./types/DeleteAccountInput";
 import { EditProfileInput } from "./types/EditProfileInput";
-import { GerUserProfileInput } from "./types/GetUserProfileInput";
-import { SignInInput } from "./types/SignInInput";
 import { SignUpInput } from "./types/SignUpInput";
 import { TokenResponse } from "./types/TokenResponse";
 import { UserResponseObjectType } from "./types/UserResponseObjectType";
@@ -48,10 +46,13 @@ export class UserResolver {
   }
 
   @Query(() => TokenResponse)
-  async signIn(@Arg("args") args: SignInInput): Promise<UserResponseInterface> {
+  async signIn(
+    @Arg("accountId") accountId: string,
+    @Arg("password") password: string
+  ): Promise<UserResponseInterface> {
     try {
       const existUser = await User.findOne({
-        where: { accountId: args.accountId }
+        where: { accountId }
       });
       if (!existUser) {
         return {
@@ -59,12 +60,9 @@ export class UserResolver {
           error: "User not found with that ID"
         };
       }
-      const checkPassword = await comparePassword(
-        args.password,
-        existUser.password
-      );
+      const checkPassword = await comparePassword(password, existUser.password);
       if (checkPassword) {
-        const token = createJWT(existUser.id);
+        const token = await createJWT(existUser.id);
         return {
           ok: true,
           error: null,
@@ -84,16 +82,28 @@ export class UserResolver {
     }
   }
 
+  @Query(() => User)
+  async getMe(@Ctx() ctxUser) {
+    try {
+      const user = await User.findOne({
+        where: { id: ctxUser.id }
+      });
+      return user;
+    } catch (error) {
+      return error.message;
+    }
+  }
+
   @Query(() => UserResponseObjectType)
   async getUserProfile(
-    @Arg("args") args: GerUserProfileInput,
+    @Arg("nickname") nickname: string,
     @Ctx() ctxUser
   ): Promise<UserResponseInterface> {
-    if (args.id === String(ctxUser.id)) {
+    if (nickname === String(ctxUser.nickname)) {
       try {
         const user = await User.findOne({
-          where: { id: ctxUser.id },
-          relations: ["posts", "bookmarkedPosts"]
+          where: { nickname: ctxUser.nickname },
+          relations: ["posts", "bookmarkedPosts", "favCategories"]
         });
         return {
           ok: true,
@@ -110,7 +120,7 @@ export class UserResolver {
     } else {
       try {
         const user = await User.findOne({
-          where: { id: args.id },
+          where: { nickname },
           relations: ["posts"]
         });
         return {

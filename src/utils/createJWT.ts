@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 
-const createJWT = (id: string): string => {
-  const token = jwt.sign(
+const createJWT = async (id: string) => {
+  const token = await jwt.sign(
     {
       id
     },
