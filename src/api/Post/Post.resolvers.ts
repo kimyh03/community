@@ -48,7 +48,7 @@ export class PostResolver {
   }
 
   @Query(() => PostResponseObjectType)
-  async seePostDetail(@Arg("id") id: string): Promise<PostResponseInterface> {
+  async seePostDetail(@Arg("id") id: string, @Ctx() ctxUser) {
     const post = await Post.findOne({
       relations: ["user", "likes", "comments"],
       where: { id }
@@ -59,7 +59,8 @@ export class PostResolver {
     return {
       ok: true,
       error: null,
-      post
+      post,
+      reqUser: ctxUser.nickname
     };
   }
 
@@ -126,6 +127,9 @@ export class PostResolver {
       const postRepository = await getRepository(Post);
       const posts = await postRepository.find({
         where: { categoryTitle },
+        order: {
+          id: "DESC"
+        },
         take: TAKE,
         skip: (page - 1) * TAKE
       });

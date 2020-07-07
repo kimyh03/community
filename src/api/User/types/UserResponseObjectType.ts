@@ -11,4 +11,7 @@ export class UserResponseObjectType {
 
   @Field({ nullable: true })
   user?: User;
+
+  @Field({ nullable: true })
+  reqUser?: string;
 }

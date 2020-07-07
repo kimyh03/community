@@ -99,10 +99,7 @@ export class UserResolver {
   }
 
   @Query(() => UserResponseObjectType)
-  async getUserProfile(
-    @Arg("nickname") nickname: string,
-    @Ctx() ctxUser
-  ): Promise<UserResponseInterface> {
+  async getUserProfile(@Arg("nickname") nickname: string, @Ctx() ctxUser) {
     if (nickname === String(ctxUser.nickname)) {
       try {
         const user = await User.findOne({
@@ -112,7 +109,8 @@ export class UserResolver {
         return {
           ok: true,
           error: null,
-          user
+          user,
+          reqUser: ctxUser.nickname
         };
       } catch (error) {
         return {
@@ -147,7 +145,7 @@ export class UserResolver {
     @Arg("id") id: string,
     @Arg("args") args: EditProfileInput,
     @Ctx() ctxUser: User
-  ): Promise<UserResponseInterface> {
+  ) {
     if (!ctxUser) throw Error("Log in please");
     if (id === String(ctxUser.id)) {
       try {
