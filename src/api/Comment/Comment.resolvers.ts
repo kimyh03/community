@@ -3,7 +3,6 @@ import { Comment } from "../../models/Comment";
 import { Post } from "../../models/Post";
 import { CommentResponseInterface } from "../ResponseInterface";
 import { CommentResponseObjectType } from "./types/CommentResponseObjectType";
-import { CreateCommentInput } from "./types/CreateCommnetInput";
 import { DeleteCommentInput } from "./types/DeleteCommentInput";
 import { EditCommentInput } from "./types/EditCommentInput";
 
@@ -11,17 +10,19 @@ import { EditCommentInput } from "./types/EditCommentInput";
 export class CommentResolver {
   @Mutation(() => CommentResponseObjectType)
   async createComment(
-    @Arg("args") args: CreateCommentInput,
+    @Arg("postId") postId: string,
+    @Arg("text") text: string,
     @Ctx() ctxUser
   ): Promise<CommentResponseInterface> {
     if (!ctxUser.id) throw Error("Log in please");
-    const post = await Post.findOne({ where: { id: args.postId } });
+    const post = await Post.findOne({ where: { id: postId } });
     if (!post) throw Error("Post not found");
     try {
       const newComment = await Comment.create({
         user: ctxUser,
+        userName: ctxUser.nickname,
         post,
-        text: args.text
+        text
       });
       post.commentCount = post.commentCount + 1;
       await post.save();
