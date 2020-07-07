@@ -24,6 +24,10 @@ export class Comment extends BaseEntity {
   })
   user: User;
 
+  @Field(() => String)
+  @Column({ type: "text" })
+  userName: string;
+
   @Field(() => Post)
   @ManyToOne((type) => Post, (post) => post.comments, {
     onDelete: "CASCADE"
@@ -34,11 +38,11 @@ export class Comment extends BaseEntity {
   @Column({ type: "text" })
   text: string;
 
-  @Field(() => String)
-  @CreateDateColumn()
-  createdAt: string;
+  @Field(() => Date)
+  @CreateDateColumn({ type: "timestamp" })
+  createdAt: Date;
 
-  @Field(() => String)
-  @UpdateDateColumn()
-  updatedAt: string;
+  @Field(() => Date)
+  @UpdateDateColumn({ type: "timestamp" })
+  updatedAt: Date;
 }
