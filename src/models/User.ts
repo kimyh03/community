@@ -46,8 +46,10 @@ export class User extends BaseEntity {
   @Column({ type: "text", nullable: true })
   bio: string;
 
-  @Field(() => [Category])
-  @ManyToMany((type) => Category, (category) => category.haveFavUsers)
+  @Field(() => [Category], { nullable: true })
+  @ManyToMany((type) => Category, (category) => category.haveFavUsers, {
+    nullable: true
+  })
   @JoinTable()
   favCategories: Category[];
 
@@ -79,8 +81,8 @@ export class User extends BaseEntity {
   @RelationCount((user: User) => user.likesReceived)
   likesReceivedCount: number;
 
-  @Field(() => [Post])
-  @ManyToMany((type) => Post, (post) => post.bookMakedUsers)
+  @Field(() => [Post], { nullable: true })
+  @ManyToMany((type) => Post, (post) => post.bookMakedUsers, { nullable: true })
   @JoinTable()
   bookmarkedPosts: Post[];
 
