@@ -3,7 +3,6 @@ import { Comment } from "../../models/Comment";
 import { Post } from "../../models/Post";
 import { CommentResponseInterface } from "../ResponseInterface";
 import { CommentResponseObjectType } from "./types/CommentResponseObjectType";
-import { DeleteCommentInput } from "./types/DeleteCommentInput";
 import { EditCommentInput } from "./types/EditCommentInput";
 
 @Resolver()
@@ -69,25 +68,19 @@ export class CommentResolver {
 
   @Mutation(() => CommentResponseObjectType)
   async deleteComment(
-    @Arg("args") args: DeleteCommentInput,
+    @Arg("id") id: string,
     @Ctx() ctxUser
   ): Promise<CommentResponseInterface> {
     if (!ctxUser.id) throw Error("Log in please");
     const comment = await Comment.findOne({
-      where: { id: args.commentId },
+      where: { id },
       relations: ["user"]
     });
     if (!comment) throw Error("Comment not found");
-    const post = await Post.findOne({
-      where: { id: args.postId }
-    });
-    if (!post) throw Error("Post not found");
     if (comment.user.id !== ctxUser.id)
       throw Error("You don't have a permission");
     try {
       await comment.remove();
-      post.commentCount = post.commentCount - 1;
-      await post.save();
       return {
         ok: true,
         error: null

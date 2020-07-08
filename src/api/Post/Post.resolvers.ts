@@ -5,7 +5,6 @@ import { Post } from "../../models/Post";
 import { User } from "../../models/User";
 import { PostResponseInterface } from "../ResponseInterface";
 import { CreatePostInput } from "./types/CreatePostInput";
-import { DeletePostInput } from "./types/DeletePostInput";
 import { EditPostInput } from "./types/EditPostInput";
 import { PostResponseObjectType } from "./types/PostResponeseObjectType";
 import { SeePostListResponse } from "./types/SeePostListResponse";
@@ -96,11 +95,11 @@ export class PostResolver {
 
   @Mutation(() => PostResponseObjectType)
   async deletePost(
-    @Arg("args") args: DeletePostInput,
+    @Arg("id") id: string,
     @Ctx() ctxUser
   ): Promise<PostResponseInterface> {
     if (!ctxUser.id) throw Error("Log in please");
-    const post = await Post.findOne({ where: { id: args.id } });
+    const post = await Post.findOne({ where: { id } });
     if (!post) throw Error("Post not found");
     if (post.userId !== ctxUser.id) throw Error("You don't have a permission");
     try {
