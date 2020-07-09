@@ -4,8 +4,6 @@ import { Category } from "../../models/Category";
 import { Post } from "../../models/Post";
 import { User } from "../../models/User";
 import { PostResponseInterface } from "../ResponseInterface";
-import { CreatePostInput } from "./types/CreatePostInput";
-import { EditPostInput } from "./types/EditPostInput";
 import { PostResponseObjectType } from "./types/PostResponeseObjectType";
 import { SeePostListResponse } from "./types/SeePostListResponse";
 import { ToggleBookmarkPostInput } from "./types/ToggleBookmarkPostInput";
@@ -14,22 +12,24 @@ import { ToggleBookmarkPostInput } from "./types/ToggleBookmarkPostInput";
 export class PostResolver {
   @Mutation(() => PostResponseObjectType)
   async createPost(
-    @Arg("args") args: CreatePostInput,
+    @Arg("categoryTitle") categoryTitle: string,
+    @Arg("title") title: string,
+    @Arg("text") text: string,
     @Ctx() ctxUser
   ): Promise<PostResponseInterface> {
     if (!ctxUser.id) throw Error("Log in please");
     const category = await Category.findOne({
-      where: { title: args.categoryTitle }
+      where: { title: categoryTitle }
     });
     if (!category) throw Error("Category not found");
     try {
       const newPost = Post.create({
-        title: args.title,
-        text: args.text,
+        title,
+        text,
         user: ctxUser,
         userName: ctxUser.nickname,
         category,
-        categoryTitle: category.title
+        categoryTitle
       });
       await newPost.save();
       return {
@@ -63,10 +63,24 @@ export class PostResolver {
     };
   }
 
+  @Query(() => PostResponseObjectType)
+  async getPostForEdit(@Arg("id") id: string) {
+    const post = await Post.findOne({
+      where: { id }
+    });
+    if (!post) throw Error("Post not found");
+    return {
+      ok: true,
+      error: null,
+      post
+    };
+  }
+
   @Mutation(() => PostResponseObjectType)
   async editPost(
     @Arg("id") id: string,
-    @Arg("args") args: EditPostInput,
+    @Arg("title") title: string,
+    @Arg("text") text: string,
     @Ctx() ctxUser
   ): Promise<PostResponseInterface> {
     if (!ctxUser.id) throw Error("Log in please");
@@ -77,7 +91,8 @@ export class PostResolver {
     if (!post) throw Error("Post not found");
     if (post.user.id !== ctxUser.id) throw Error("You don't have a permission");
     try {
-      await Object.assign(post, args);
+      post.title = title;
+      post.text = text;
       await post.save();
       return {
         ok: true,
@@ -119,8 +134,9 @@ export class PostResolver {
   @Query(() => SeePostListResponse)
   async seePostList(
     @Arg("categoryTitle") categoryTitle: string,
-    @Arg("page") page: number
-  ): Promise<PostResponseInterface> {
+    @Arg("page") page: number,
+    @Ctx() ctxUser
+  ) {
     const TAKE = 10;
     try {
       const postRepository = await getRepository(Post);
@@ -133,10 +149,16 @@ export class PostResolver {
         skip: (page - 1) * TAKE
       });
       if (posts?.length === 0) throw Error("Post not found");
+      const category = await Category.findOne({
+        where: { title: categoryTitle }
+      });
+      if (!category) throw Error("Category not found");
+      const isFav = await ctxUser.favCategoriesIds.includes(category.id);
       return {
         ok: true,
         error: null,
-        posts
+        posts,
+        isFav
       };
     } catch (error) {
       return {

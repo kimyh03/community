@@ -11,4 +11,7 @@ export class SeePostListResponse {
 
   @Field(() => [Post], { nullable: true })
   posts?: Post[];
+
+  @Field({ nullable: true })
+  isFav: boolean;
 }

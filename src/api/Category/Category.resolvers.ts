@@ -6,7 +6,6 @@ import { CategoryResponseObjectType } from "./types/CategoryResponseObjectType";
 import { CreateCategoryInput } from "./types/CreateCategoryInput";
 import { DeleteCategoryInput } from "./types/DeleteCategoryInput";
 import { EditCategoryInput } from "./types/EditCategoryInput";
-import { ToggleFavCategoryInput } from "./types/ToggleFavCategoryInput";
 
 @Resolver()
 export class CategoryResolver {
@@ -15,9 +14,6 @@ export class CategoryResolver {
     @Arg("args") args: CreateCategoryInput,
     @Ctx() ctxUser
   ): Promise<CategoryResponseInterface> {
-    if (!ctxUser.id) throw Error("Log in please");
-    if (ctxUser.nickname !== "Hoony")
-      throw Error("You don't have a permission");
     try {
       const newCategory = await Category.create({
         title: args.title,
@@ -71,9 +67,6 @@ export class CategoryResolver {
     @Arg("args") args: DeleteCategoryInput,
     @Ctx() ctxUser
   ): Promise<CategoryResponseInterface> {
-    if (!ctxUser.id) throw Error("Log in please");
-    if (ctxUser.nickname !== "Hoony")
-      throw Error("You don't have a permission");
     try {
       const category = await Category.findOne({ where: { id: args.id } });
       if (!category) throw Error("Category not found");
@@ -92,7 +85,7 @@ export class CategoryResolver {
 
   @Mutation(() => CategoryResponseObjectType)
   async toggleFavCategory(
-    @Arg("args") args: ToggleFavCategoryInput,
+    @Arg("title") title: string,
     @Ctx() ctxUser
   ): Promise<CategoryResponseInterface> {
     if (!ctxUser.id) throw Error("Log in please");
@@ -101,11 +94,11 @@ export class CategoryResolver {
       relations: ["favCategories"]
     });
     if (!user) throw Error("User not found");
-    const category = await Category.findOne({ where: { id: args.id } });
+    const category = await Category.findOne({ where: { title } });
     if (!category) throw Error("Category not found");
     try {
       let cleanFavList = user.favCategories;
-      const isFavCategory = user.favCategoriesIds.includes(Number(args.id));
+      const isFavCategory = user.favCategoriesIds.includes(Number(category.id));
       if (isFavCategory) {
         cleanFavList = cleanFavList.filter((item) => item.id !== category.id);
       } else {
