@@ -5,7 +5,6 @@ import { comparePassword, encryptToHash } from "../../utils/hashAuthentication";
 import { UserResponseInterface } from "../ResponseInterface";
 import { ChangePasswordInput } from "./types/ChangePasswordInput";
 import { DeleteAccountInput } from "./types/DeleteAccountInput";
-import { EditProfileInput } from "./types/EditProfileInput";
 import { TokenResponse } from "./types/TokenResponse";
 import { UserResponseObjectType } from "./types/UserResponseObjectType";
 
@@ -14,49 +13,38 @@ export class UserResolver {
   @Mutation(() => TokenResponse)
   async signUp(
     @Arg("nickname") nickname: string,
-    @Arg("accountId") accountId: string,
     @Arg("password") password: string,
     @Arg("email") email: string
-  ): Promise<UserResponseInterface> {
-    try {
-      const existUser = await User.findOne({ where: { email } });
-      if (existUser?.id) {
-        return {
-          ok: false,
-          error: "You have a account, Log in Please"
-        };
-      } else {
-        const hashedPassword = await encryptToHash(password);
-        const newUser = await User.create({
-          email,
-          accountId,
-          password: hashedPassword,
-          nickname
-        });
-        await newUser.save();
-        const token = await createJWT(newUser.id);
-        return {
-          ok: true,
-          error: null,
-          token
-        };
-      }
-    } catch (error) {
+  ) {
+    const existUserWithEmail = await User.findOne({ where: { email } });
+    const existUserWithNickname = await User.findOne({ where: { nickname } });
+    if (existUserWithEmail?.id) {
+      throw Error("이미 존재하는 이메일 입니다.");
+    } else if (existUserWithNickname?.id) {
+      throw Error("이미 존재하는 닉네임 입니다.");
+    } else {
+      const hashedPassword = await encryptToHash(password);
+      const newUser = await User.create({
+        email,
+        password: hashedPassword,
+        nickname
+      });
+      await newUser.save();
       return {
-        ok: false,
-        error: error.message
+        ok: true,
+        error: null
       };
     }
   }
 
   @Mutation(() => TokenResponse)
   async signIn(
-    @Arg("accountId") accountId: string,
+    @Arg("nickname") nickname: string,
     @Arg("password") password: string
   ): Promise<UserResponseInterface> {
     try {
       const existUser = await User.findOne({
-        where: { accountId }
+        where: { nickname }
       });
       if (!existUser) {
         return {
@@ -141,33 +129,19 @@ export class UserResolver {
   }
 
   @Mutation(() => UserResponseObjectType)
-  async editProfile(
-    @Arg("id") id: string,
-    @Arg("args") args: EditProfileInput,
-    @Ctx() ctxUser: User
-  ) {
+  async editBio(@Arg("bio") bio: string, @Ctx() ctxUser: User) {
     if (!ctxUser) throw Error("Log in please");
-    if (id === String(ctxUser.id)) {
-      try {
-        await Object.assign(ctxUser, args);
-        await ctxUser.save();
-        return {
-          ok: true,
-          error: null,
-          user: ctxUser
-        };
-      } catch (error) {
-        return {
-          ok: false,
-          error: error.message,
-          user: null
-        };
-      }
-    } else {
+    try {
+      ctxUser.bio = bio;
+      await ctxUser.save();
+      return {
+        ok: true,
+        error: null
+      };
+    } catch (error) {
       return {
         ok: false,
-        error: "You don't have permission!",
-        user: null
+        error: error.message
       };
     }
   }
@@ -213,7 +187,6 @@ export class UserResolver {
     @Ctx() ctxUser: User
   ): Promise<UserResponseInterface> {
     if (!ctxUser?.id) throw Error("Log in please");
-    console.log(args.id, ctxUser.id);
     if (args.id !== String(ctxUser.id))
       throw Error("You don't have permission!");
     try {

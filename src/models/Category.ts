@@ -8,6 +8,7 @@ import {
   ManyToMany,
   OneToMany,
   PrimaryGeneratedColumn,
+  RelationCount,
   RelationId,
   UpdateDateColumn
 } from "typeorm";
@@ -36,6 +37,10 @@ export class Category extends BaseEntity {
   @Field(() => [Number])
   @RelationId((category: Category) => category.posts)
   postsIds: number[];
+
+  @Field(() => Number)
+  @RelationCount((category: Category) => category.posts)
+  postCount: number;
 
   @Field(() => [User])
   @ManyToMany((type) => User, (user) => user.favCategories)

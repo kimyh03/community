@@ -10,4 +10,10 @@ export class TokenResponse {
 
   @Field(() => String, { nullable: true })
   token?: string;
+
+  @Field(() => Boolean, { nullable: true })
+  existNickname?: boolean;
+
+  @Field(() => Boolean, { nullable: true })
+  existEmail?: boolean;
 }

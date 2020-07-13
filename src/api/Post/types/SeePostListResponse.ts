@@ -14,4 +14,7 @@ export class SeePostListResponse {
 
   @Field({ nullable: true })
   isFav: boolean;
+
+  @Field({ nullable: true })
+  postCount: number;
 }

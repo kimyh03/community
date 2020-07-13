@@ -26,19 +26,15 @@ export class User extends BaseEntity {
   id: string;
 
   @Field(() => String)
-  @Column({ type: "text" })
+  @Column({ type: "text", unique: true })
   nickname: string;
-
-  @Field(() => String)
-  @Column({ type: "text", nullable: true })
-  accountId: string;
 
   @Field(() => String)
   @Column({ type: "text" })
   password: string;
 
   @Field(() => String)
-  @Column({ type: "text" })
+  @Column({ type: "text", unique: true })
   @IsEmail()
   email: string;
 

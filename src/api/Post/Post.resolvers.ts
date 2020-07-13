@@ -6,7 +6,6 @@ import { User } from "../../models/User";
 import { PostResponseInterface } from "../ResponseInterface";
 import { PostResponseObjectType } from "./types/PostResponeseObjectType";
 import { SeePostListResponse } from "./types/SeePostListResponse";
-import { ToggleBookmarkPostInput } from "./types/ToggleBookmarkPostInput";
 
 @Resolver()
 export class PostResolver {
@@ -53,13 +52,27 @@ export class PostResolver {
       where: { id }
     });
     if (!post) throw Error("Post not found");
+    let isLiked;
+    let isBookmarked;
+    if (ctxUser.id) {
+      isBookmarked = await ctxUser.bookmarkedPostsIds.includes(post.id);
+      const existLike = await post.likes.filter(
+        (like) => like.userId === ctxUser.id
+      );
+      if (existLike.length === 1) {
+        isLiked = true;
+      } else isLiked = false;
+    }
+
     post.viewCount += 1;
     post.save();
     return {
       ok: true,
       error: null,
       post,
-      reqUser: ctxUser.nickname
+      reqUser: ctxUser.nickname,
+      isBookmarked,
+      isLiked
     };
   }
 
@@ -137,7 +150,7 @@ export class PostResolver {
     @Arg("page") page: number,
     @Ctx() ctxUser
   ) {
-    const TAKE = 10;
+    const TAKE = 3;
     try {
       const postRepository = await getRepository(Post);
       const posts = await postRepository.find({
@@ -153,12 +166,16 @@ export class PostResolver {
         where: { title: categoryTitle }
       });
       if (!category) throw Error("Category not found");
-      const isFav = await ctxUser.favCategoriesIds.includes(category.id);
+      let isFav;
+      if (ctxUser.id) {
+        isFav = await ctxUser.favCategoriesIds.includes(category.id);
+      }
       return {
         ok: true,
         error: null,
         posts,
-        isFav
+        isFav,
+        postCount: category.postCount
       };
     } catch (error) {
       return {
@@ -171,7 +188,7 @@ export class PostResolver {
 
   @Mutation(() => PostResponseObjectType)
   async toggleBookmarkPost(
-    @Arg("args") args: ToggleBookmarkPostInput,
+    @Arg("id") id: string,
     @Ctx() ctxUser
   ): Promise<PostResponseInterface> {
     if (!ctxUser.id) throw Error("Log in please");
@@ -180,12 +197,10 @@ export class PostResolver {
       relations: ["bookmarkedPosts"]
     });
     if (!user) throw Error("User not found");
-    const post = await Post.findOne({ where: { id: args.id } });
+    const post = await Post.findOne({ where: { id } });
     if (!post) throw Error("Post not found");
     try {
-      const isBookmarkedPost = user.bookmarkedPostsIds.includes(
-        Number(args.id)
-      );
+      const isBookmarkedPost = user.bookmarkedPostsIds.includes(Number(id));
       let cleanBookmarkedPosts: Post[];
       if (isBookmarkedPost) {
         cleanBookmarkedPosts = user.bookmarkedPosts.filter(

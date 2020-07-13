@@ -14,4 +14,10 @@ export class PostResponseObjectType {
 
   @Field({ nullable: true })
   reqUser: string;
+
+  @Field({ nullable: true })
+  isBookmarked: boolean;
+
+  @Field({ nullable: true })
+  isLiked: boolean;
 }
