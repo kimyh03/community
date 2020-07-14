@@ -74,15 +74,26 @@ export class UserResolver {
     }
   }
 
-  @Query(() => User)
+  @Query(() => UserResponseObjectType)
   async getMe(@Ctx() ctxUser) {
     try {
       const user = await User.findOne({
         where: { id: ctxUser.id }
       });
-      return user;
+      if (!user) {
+        throw Error("잘못된 접근 입니다.");
+      }
+      return {
+        ok: true,
+        error: null,
+        user
+      };
     } catch (error) {
-      return error.message;
+      return {
+        ok: false,
+        error: error.message,
+        user: null
+      };
     }
   }
 
