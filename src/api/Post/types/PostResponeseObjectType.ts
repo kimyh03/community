@@ -12,6 +12,9 @@ export class PostResponseObjectType {
   @Field({ nullable: true })
   post: Post;
 
+  @Field(() => [Post], { nullable: true })
+  posts: Post[];
+
   @Field({ nullable: true })
   reqUser: string;
 

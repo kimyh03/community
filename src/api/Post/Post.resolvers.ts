@@ -1,5 +1,5 @@
 import { Arg, Ctx, Mutation, Query, Resolver } from "type-graphql";
-import { getRepository } from "typeorm";
+import { getRepository, Like } from "typeorm";
 import { Category } from "../../models/Category";
 import { Post } from "../../models/Post";
 import { User } from "../../models/User";
@@ -144,13 +144,38 @@ export class PostResolver {
     }
   }
 
+  @Query(() => PostResponseObjectType)
+  async searchPost(@Arg("term") term: string, @Arg("time") time: number) {
+    const TAKE = 10;
+    try {
+      const postRepository = await getRepository(Post);
+      const posts = await postRepository.find({
+        where: [{ title: Like(`%${term}%`) }, { text: Like(`%${term}%`) }],
+        order: {
+          id: "DESC"
+        },
+        take: TAKE,
+        skip: (time - 1) * TAKE
+      });
+      return {
+        ok: true,
+        posts
+      };
+    } catch (error) {
+      return {
+        ok: false,
+        error: error.message
+      };
+    }
+  }
+
   @Query(() => SeePostListResponse)
   async seePostList(
     @Arg("categoryTitle") categoryTitle: string,
     @Arg("page") page: number,
     @Ctx() ctxUser
   ) {
-    const TAKE = 3;
+    const TAKE = 15;
     try {
       const postRepository = await getRepository(Post);
       const posts = await postRepository.find({

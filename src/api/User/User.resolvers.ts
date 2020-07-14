@@ -111,7 +111,7 @@ export class UserResolver {
       try {
         const user = await User.findOne({
           where: { nickname },
-          relations: ["posts"]
+          relations: ["posts", "favCategories"]
         });
         return {
           ok: true,
