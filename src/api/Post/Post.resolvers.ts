@@ -146,7 +146,7 @@ export class PostResolver {
 
   @Query(() => PostResponseObjectType)
   async searchPost(@Arg("term") term: string, @Arg("time") time: number) {
-    const TAKE = 10;
+    const TAKE = 4;
     try {
       const postRepository = await getRepository(Post);
       const posts = await postRepository.find({
@@ -157,10 +157,17 @@ export class PostResolver {
         take: TAKE,
         skip: (time - 1) * TAKE
       });
-      return {
-        ok: true,
-        posts
-      };
+      if (posts.length > 0) {
+        return {
+          ok: true,
+          posts
+        };
+      } else {
+        return {
+          ok: false,
+          posts: null
+        };
+      }
     } catch (error) {
       return {
         ok: false,
